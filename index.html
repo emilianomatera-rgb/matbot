@@ -412,11 +412,11 @@
       text-decoration: underline;
     }
 
-    /* MODAL REPORT */
+    /* MODAL OVERLAYS */
     .modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(15, 23, 42, 0.55);
+      background: rgba(15, 23, 42, 0.65);
       display: none;
       align-items: center;
       justify-content: center;
@@ -431,18 +431,51 @@
     .modal-card {
       background: white;
       width: 100%;
-      max-width: 500px;
+      max-width: 480px;
       border-radius: 16px;
-      padding: 22px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+      padding: 24px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.25);
       max-height: 90dvh;
       overflow-y: auto;
     }
 
     .modal-card h2 {
-      font-size: 1.2rem;
+      font-size: 1.25rem;
       color: var(--primary);
-      margin-bottom: 10px;
+      margin-bottom: 8px;
+    }
+
+    .modal-card p {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.88rem;
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: var(--text-main);
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 10px;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-group input:focus {
+      border-color: var(--primary);
     }
 
     .report-box {
@@ -460,27 +493,49 @@
       display: flex;
       gap: 10px;
       justify-content: flex-end;
-      margin-top: 14px;
+      margin-top: 16px;
+      flex-wrap: wrap;
     }
 
     .btn-primary {
       background: var(--primary);
       color: white;
       border: none;
-      padding: 9px 16px;
-      border-radius: 8px;
+      padding: 10px 18px;
+      border-radius: 10px;
       font-weight: 600;
       cursor: pointer;
+      font-size: 0.92rem;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-hover);
     }
 
     .btn-secondary {
       background: #e2e8f0;
       color: var(--text-main);
       border: none;
-      padding: 9px 16px;
-      border-radius: 8px;
+      padding: 10px 16px;
+      border-radius: 10px;
       font-weight: 600;
       cursor: pointer;
+      font-size: 0.92rem;
+    }
+
+    .btn-success {
+      background: var(--success);
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.92rem;
+    }
+
+    .btn-success:hover {
+      background: #15803d;
     }
 
     @media (max-width: 520px) {
@@ -492,13 +547,28 @@
 </head>
 <body>
 
+<!-- MODAL SCHERMATA INIZIALE (NOME STUDENTE) -->
+<div class="modal-overlay active" id="welcomeModal">
+  <div class="modal-card">
+    <h2>👋 Benvenuto su MateBot!</h2>
+    <p>Inserisci il tuo Nome e Cognome per iniziare la sessione di allenamento con il tutor di matematica. I tuoi dati serviranno per la scheda finale.</p>
+    <div class="form-group">
+      <label for="regStudentName">Nome e Cognome:</label>
+      <input type="text" id="regStudentName" placeholder="Es. Mario Rossi" autocomplete="name" />
+    </div>
+    <div class="modal-actions" style="justify-content: stretch;">
+      <button class="btn-primary" onclick="startSession()" style="width: 100%;">Inizia Allenamento →</button>
+    </div>
+  </div>
+</div>
+
 <div class="app-container">
   <header>
     <div class="bot-identity">
       <div class="bot-avatar">∑</div>
       <div class="bot-info">
         <h1>MateBot · Tutor di Matematica</h1>
-        <p><span class="status-dot"></span> Guida passo-passo · Aritmetica e Numeri Interi</p>
+        <p><span class="status-dot"></span> <span id="headerStudentLabel">Studente</span> · Aritmetica</p>
       </div>
     </div>
     <div class="header-actions">
@@ -541,25 +611,23 @@
   </div>
 </div>
 
-<!-- MODAL REPORT FINALE -->
+<!-- MODAL REPORT FINALE CON GOOGLE FORMS -->
 <div class="modal-overlay" id="reportModal">
-  <div class="modal-card">
-    <h2>📋 Riepilogo Attività Studente</h2>
-    <p style="font-size:0.88rem; color:var(--text-muted);">Puoi copiare questo riepilogo e inviarlo al tuo docente su Moodle, Classroom o via email.</p>
-    <div style="margin-top:10px;">
-      <label style="font-size:0.85rem; font-weight:600;">Nome e Cognome (opzionale):</label>
-      <input type="text" id="studentNameInput" placeholder="Es. Mario Rossi" oninput="updateReportText()" style="width:100%; padding:8px; margin-top:4px; border:1px solid #cbd5e1; border-radius:8px;" />
-    </div>
+  <div class="modal-card" style="max-width: 540px;">
+    <h2>📋 Riepilogo Attività & Invio Docente</h2>
+    <p>Ecco il riepilogo del tuo lavoro. Clicca sul pulsante verde per inviare automaticamente i risultati tramite Google Form al tuo docente.</p>
     <div class="report-box" id="reportContent"></div>
     <div class="modal-actions">
-      <button class="btn-secondary" onclick="closeReport()">Chiudi</button>
-      <button class="btn-primary" onclick="copyReport()">Copia Riepilogo</button>
+      <button class="btn-secondary" onclick="closeReport()">Continua ad allenarti</button>
+      <button class="btn-primary" onclick="copyReportText()">Copia Testo</button>
+      <button class="btn-success" onclick="sendToGoogleForm()">🚀 Invia al Docente (Google Form)</button>
     </div>
   </div>
 </div>
 
 <script>
   const state = {
+    studentName: "",
     currentTopic: null,
     currentExercise: null,
     currentStepIndex: 0,
@@ -570,6 +638,13 @@
     completedByTopic: {
       1: 0, 2: 0, 3: 0, 4: 0, 5: 0
     }
+  };
+
+  // --- CONFIGURAZIONE GOOGLE FORM AGGIORNATA ---
+  const GOOGLE_FORM_CONFIG = {
+    formViewUrl: "https://docs.google.com/forms/d/e/1FAIpQLSdSXBpm7xxqZ9N21s_13RzFww3oHUH6vxFWRHxmjHjlu1NMSg/viewform",
+    nameEntryId: "entry.972174012",
+    reportEntryId: "entry.164754756"
   };
 
   const TOPICS = {
@@ -628,6 +703,20 @@
     }
   };
 
+  function startSession() {
+    const input = document.getElementById("regStudentName");
+    const nameVal = input.value.trim();
+    if (!nameVal) {
+      alert("Per favore, inserisci il tuo Nome e Cognome per continuare.");
+      input.focus();
+      return;
+    }
+    state.studentName = nameVal;
+    document.getElementById("headerStudentLabel").textContent = nameVal;
+    document.getElementById("welcomeModal").classList.remove("active");
+    showMenu();
+  }
+
   function generateExercise(topicId) {
     const r = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
     const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
@@ -641,64 +730,52 @@
         const finalRes = step2 - d;
         return {
           topicId: 1,
-          expression: `${a} + ${b} · ${c} − ${d}`,
+          expression: `${a} +${b} · ${c} −${d}`,
           steps: [
             {
-              prompt: `Osserva l'espressione: <strong>${a} + ${b} · ${c} − ${d}</strong>.<br>Quale operazione ha la precedenza? Scrivi il risultato di <strong>${b} · ${c}</strong>.`,
+              prompt: `Osserva l'espressione: <strong>${a} +${b} · ${c} −${d}</strong>.<br>Quale operazione ha la precedenza? Scrivi il risultato di <strong>${b} ·${c}</strong>.`,
               expected: [String(prod)],
               hints: [
                 `Ricorda: moltiplicazioni e divisioni si fanno PRIMA di addizioni e sottrazioni.`,
-                `Devi calcolare prima ${b} · ${c}. Quanto fa?`
+                `Devi calcolare prima ${b} ·${c}. Quanto fa?`
               ],
               commonErrors: {
-                [String(a + b)]: `Attenzione! Hai sommato ${a} + ${b} prima di moltiplicare. La moltiplicazione ha la precedenza sull'addizione!`
+                [String(a + b)]: `Attenzione! Hai sommato ${a} +${b} prima di moltiplicare. La moltiplicazione ha la precedenza sull'addizione!`
               },
-              nextExpr: `${a} + ${prod} − ${d}`
+              nextExpr: `${a} + ${prod} −${d}`
             },
             {
-              prompt: `Bene! Ora l'espressione è diventata: <strong>${a} + ${prod} − ${d}</strong>.<br>Ci sono solo addizioni e sottrazioni: procedi <strong>da sinistra a destra</strong>. Quanto fa <strong>${a} + ${prod}</strong>?`,
+              prompt: `Bene! Ora l'espressione è diventata: <strong>${a} + ${prod} −${d}</strong>.<br>Ci sono solo addizioni e sottrazioni: procedi <strong>da sinistra a destra</strong>. Quanto fa <strong>${a} +${prod}</strong>?`,
               expected: [String(step2)],
               hints: [
-                `Esegui la prima operazione partendo da sinistra: ${a} + ${prod}.`
+                `Esegui la prima operazione partendo da sinistra: ${a} +${prod}.`
               ],
               commonErrors: {},
-              nextExpr: `${step2} − ${d}`
+              nextExpr: `${step2} −${d}`
             },
             {
-              prompt: `Ultimo passaggio: <strong>${step2} − ${d}</strong>. Qual è il risultato finale?`,
+              prompt: `Ultimo passaggio: <strong>${step2} −${d}</strong>. Qual è il risultato finale?`,
               expected: [String(finalRes)],
-              hints: [`Sottrai ${d} da ${step2}.`],
+              hints: [`Sottrai ${d} da${step2}.`],
               commonErrors: {},
-              nextExpr: `${finalRes}`
-            }
-          ]
-        };
-      } else if (type === 2) {
-        const q = r(3, 8), b = r(2, 5), c = r(2, 6);
-        const a = q * b;
-        const finalRes = q * c;
-        return {
-          topicId: 1,
-          expression: `${a} : ${b} · ${c}`,
+              nextExpr: `${finalRes}` } ] }; } else if (type === 2) { const q = r(3, 8), b = r(2, 5), c = r(2, 6); const a = q * b; const finalRes = q * c; return { topicId: 1, expression: `${a} : ${b} ·${c}`,
           steps: [
             {
-              prompt: `Guarda bene: <strong>${a} : ${b} · ${c}</strong>.<br>Divisione e moltiplicazione hanno la <strong>stessa precedenza</strong>, quindi si va <strong>da sinistra verso destra</strong>. Quanto fa il primo calcolo <strong>${a} : ${b}</strong>?`,
+              prompt: `Guarda bene: <strong>${a} : ${b} ·${c}</strong>.<br>Divisione e moltiplicazione hanno la <strong>stessa precedenza</strong>, quindi si va <strong>da sinistra verso destra</strong>. Quanto fa il primo calcolo <strong>${a} :${b}</strong>?`,
               expected: [String(q)],
               hints: [
-                `Non fare prima ${b} · ${c}! Quando ci sono solo : e · si parte sempre da sinistra.`,
-                `Calcola ${a} diviso ${b}.`
+                `Non fare prima ${b} ·${c}! Quando ci sono solo : e · si parte sempre da sinistra.`,
+                `Calcola ${a} diviso${b}.`
               ],
               commonErrors: {
-                [String(b * c)]: `Errore classico! Hai iniziato da destra facendo ${b} · ${c}. A parità di precedenza si procede sempre da sinistra verso destra: inizia con ${a} : ${b}.`
+                [String(b * c)]: `Errore classico! Hai iniziato da destra facendo ${b} ·${c}. A parità di precedenza si procede sempre da sinistra verso destra: inizia con ${a} :${b}.`
               },
-              nextExpr: `${q} · ${c}`
+              nextExpr: `${q} ·${c}`
             },
             {
-              prompt: `Esatto! Ora resta <strong>${q} · ${c}</strong>. Qual è il risultato finale?`,
+              prompt: `Esatto! Ora resta <strong>${q} ·${c}</strong>. Qual è il risultato finale?`,
               expected: [String(finalRes)],
-              hints: [`Moltiplica ${q} per ${c}.`],
-              commonErrors: {},
-              nextExpr: `${finalRes}`
+              hints: [`Moltiplica ${q} per ${c}.`], commonErrors: {}, nextExpr: `${finalRes}`
             }
           ]
         };
@@ -708,25 +785,18 @@
         const finalRes = step1 + c;
         return {
           topicId: 1,
-          expression: `${a} − ${b} + ${c}`,
-          steps: [
-            {
-              prompt: `Calcola <strong>${a} − ${b} + ${c}</strong>.<br>Sottrazione e addizione hanno la stessa precedenza: si procede da sinistra a destra. Quanto fa <strong>${a} − ${b}</strong>?`,
+          expression: `${a} −${b} + ${c}`, steps: [ { prompt: `Calcola <strong>${a} − ${b} +${c}</strong>.<br>Sottrazione e addizione hanno la stessa precedenza: si procede da sinistra a destra. Quanto fa <strong>${a} −${b}</strong>?`,
               expected: [String(step1)],
               hints: [
-                `Non sommare prima ${b} + ${c}! Parti da sinistra con ${a} − ${b}.`
+                `Non sommare prima ${b} +${c}! Parti da sinistra con ${a} −${b}.`
               ],
               commonErrors: {
-                [String(b + c)]: `Attenzione: l'addizione NON viene prima della sottrazione! Si va sempre da sinistra a destra: calcola prima ${a} − ${b}.`
+                [String(b + c)]: `Attenzione: l'addizione NON viene prima della sottrazione! Si va sempre da sinistra a destra: calcola prima ${a} −${b}.`
               },
-              nextExpr: `${step1} + ${c}`
+              nextExpr: `${step1} +${c}`
             },
             {
-              prompt: `Ottimo! Ora calcola <strong>${step1} + ${c}</strong>:`,
-              expected: [String(finalRes)],
-              hints: [`Somma ${step1} e ${c}.`],
-              commonErrors: {},
-              nextExpr: `${finalRes}`
+              prompt: `Ottimo! Ora calcola <strong>${step1} + ${c}</strong>:`, expected: [String(finalRes)], hints: [`Somma ${step1} e ${c}.`], commonErrors: {}, nextExpr: `${finalRes}`
             }
           ]
         };
@@ -742,28 +812,24 @@
       const finalRes = m * quadra;
       return {
         topicId: 2,
-        expression: `${m} · [ ${a} − (${b} + ${c}) ]`,
+        expression: `${m} · [${a} − (${b} +${c}) ]`,
         steps: [
           {
-            prompt: `Partiamo dall'interno: prima la <strong>parentesi tonda</strong>.<br>Quanto fa <strong>(${b} + ${c})</strong>?`,
+            prompt: `Partiamo dall'interno: prima la <strong>parentesi tonda</strong>.<br>Quanto fa <strong>(${b} +${c})</strong>?`,
             expected: [String(tonda)],
-            hints: [`Calcola l'operazione dentro le parentesi tonde: ${b} + ${c}.`],
-            commonErrors: {},
-            nextExpr: `${m} · [ ${a} − ${tonda} ]`
+            hints: [`Calcola l'operazione dentro le parentesi tonde: ${b} + ${c}.`], commonErrors: {}, nextExpr: `${m} · [ ${a} −${tonda} ]`
           },
           {
-            prompt: `Ora l'espressione è <strong>${m} · [ ${a} − ${tonda} ]</strong>.<br>Risolvi la <strong>parentesi quadra</strong>: quanto fa <strong>${a} − ${tonda}</strong>?`,
+            prompt: `Ora l'espressione è <strong>${m} · [ ${a} −${tonda} ]</strong>.<br>Risolvi la <strong>parentesi quadra</strong>: quanto fa <strong>${a} −${tonda}</strong>?`,
             expected: [String(quadra)],
-            hints: [`Esegui la sottrazione dentro le quadre: ${a} − ${tonda}.`],
+            hints: [`Esegui la sottrazione dentro le quadre: ${a} −${tonda}.`],
             commonErrors: {},
-            nextExpr: `${m} · ${quadra}`
+            nextExpr: `${m} ·${quadra}`
           },
           {
-            prompt: `Perfetto! Resta solo <strong>${m} · ${quadra}</strong>. Qual è il risultato finale?`,
+            prompt: `Perfetto! Resta solo <strong>${m} ·${quadra}</strong>. Qual è il risultato finale?`,
             expected: [String(finalRes)],
-            hints: [`Moltiplica ${m} per ${quadra}.`],
-            commonErrors: {},
-            nextExpr: `${finalRes}`
+            hints: [`Moltiplica ${m} per ${quadra}.`], commonErrors: {}, nextExpr: `${finalRes}`
           }
         ]
       };
@@ -784,502 +850,32 @@
               expected: [`${b}^${sumE}`, `${b}**${sumE}`],
               hints: [
                 `Nel prodotto tra potenze con la stessa base, la base resta uguale (${b}) e gli esponenti si SOMMANO.`,
-                `Somma gli esponenti ${e1} + ${e2} e scrivi ${b}^${sumE}.`
+                `Somma gli esponenti ${e1} +${e2} e scrivi ${b}^${sumE}.`
               ],
               commonErrors: {
-                [`${b}^${e1 * e2}`]: `Attenzione: hai moltiplicato gli esponenti! Quando si moltiplicano potenze con la stessa base, gli esponenti si SOMMANO (${e1} + ${e2}).`,
+                [`${b}^${e1 * e2}`]: `Attenzione: hai moltiplicato gli esponenti! Quando si moltiplicano potenze con la stessa base, gli esponenti si SOMMANO (${e1} +${e2}).`,
                 [`${b * b}^${sumE}`]: `La base NON si moltiplica per se stessa! Resta ${b} e si sommano gli esponenti.`
               },
-              nextExpr: `${b}^${sumE}`
-            }
-          ]
-        };
-      } else if (type === 2) {
-        const b = pick([2, 3, 4, 5]);
-        const e1 = r(2, 3), e2 = r(2, 4);
-        const prodE = e1 * e2;
-        return {
-          topicId: 3,
-          expression: `(${b}^${e1})^${e2}`,
+              nextExpr: `${b}^${sumE}` } ] }; } else if (type === 2) { const b = pick([2, 3, 4, 5]); const e1 = r(2, 3), e2 = r(2, 4); const prodE = e1 * e2; return { topicId: 3, expression: `(${b}^${e1})^${e2}`,
           steps: [
             {
               prompt: `Calcola la <strong>potenza di potenza</strong>: <strong>(${b}^${e1})^${e2}</strong>.<br>Scrivi il risultato come potenza (es. 3^6):`,
               expected: [`${b}^${prodE}`, `${b}**${prodE}`],
               hints: [
                 `Nella potenza di una potenza, la base resta ${b} e gli esponenti si MOLTIPLICANO.`,
-                `Moltiplica ${e1} · ${e2} e scrivi ${b}^${prodE}.`
+                `Moltiplica ${e1} ·${e2} e scrivi ${b}^${prodE}.`
               ],
               commonErrors: {
-                [`${b}^${e1 + e2}`]: `Attenzione: hai sommato gli esponenti! Nella potenza di potenza (aᵐ)ⁿ gli esponenti si MOLTIPLICANO (${e1} · ${e2}).`
-              },
-              nextExpr: `${b}^${prodE}`
-            }
-          ]
-        };
-      } else {
-        const b = pick([2, 3]);
-        const e = b === 2 ? 3 : 2;
-        const val = Math.pow(b, e);
-        const otherBase = r(4, 15);
-        return {
-          topicId: 3,
-          expression: `${b}^${e} + ${otherBase}^0`,
+                [`${b}^${e1 + e2}`]: `Attenzione: hai sommato gli esponenti! Nella potenza di potenza (aᵐ)ⁿ gli esponenti si MOLTIPLICANO (${e1} · ${e2}).` }, nextExpr: `${b}^${prodE}` } ] }; } else { const b = pick([2, 3]); const e = b === 2 ? 3 : 2; const val = Math.pow(b, e); const otherBase = r(4, 15); return { topicId: 3, expression: `${b}^${e} +${otherBase}^0`,
           steps: [
             {
-              prompt: `Calcola il valore di <strong>${b}^${e}</strong> (ricorda: moltiplica ${b} per se stesso ${e} volte):`,
+              prompt: `Calcola il valore di <strong>${b}^${e}</strong> (ricorda: moltiplica ${b} per se stesso${e} volte):`,
               expected: [String(val)],
               hints: [`Non fare ${b} · ${e}! Calcola ${Array(e).fill(b).join(' · ')}.`],
               commonErrors: {
-                [String(b * e)]: `Errore frequente: ${b}^${e} non significa ${b} · ${e}, ma ${Array(e).fill(b).join(' · ')}. Riprova!`
+                [String(b * e)]: `Errore frequente: ${b}^${e} non significa${b} · ${e}, ma${Array(e).fill(b).join(' · ')}. Riprova!`
               },
-              nextExpr: `${val} + ${otherBase}^0`
+              nextExpr: `${val} +${otherBase}^0`
             },
             {
-              prompt: `Ora quanto vale <strong>${otherBase}^0</strong>? (Qualsiasi numero diverso da zero elevato a 0...)`,
-              expected: ["1"],
-              hints: [`Per definizione, qualsiasi numero diverso da 0 elevato a 0 fa sempre 1.`],
-              commonErrors: {
-                "0": `Attenzione: ${otherBase}^0 non fa 0! Qualsiasi potenza con esponente 0 (e base ≠ 0) vale sempre 1.`
-              },
-              nextExpr: `${val} + 1`
-            },
-            {
-              prompt: `Quindi <strong>${val} + 1</strong> = ?`,
-              expected: [String(val + 1)],
-              hints: [`Somma ${val} e 1.`],
-              commonErrors: {},
-              nextExpr: `${val + 1}`
-            }
-          ]
-        };
-      }
-    }
-
-    if (topicId === 4) {
-      const type = r(1, 3);
-      if (type === 1) {
-        const a = r(3, 9), b = r(2, 8);
-        const res = -(a + b);
-        return {
-          topicId: 4,
-          expression: `−${a} − ${b}`,
-          steps: [
-            {
-              prompt: `Calcola la somma algebrica: <strong>−${a} − ${b}</strong>.<br><em>(Pensa: perdi ${a} euro e poi perdi altri ${b} euro...)</em>`,
-              expected: [String(res)],
-              hints: [
-                `Questa è un'addizione tra due numeri concordi negativi, NON una moltiplicazione!`,
-                `I due numeri hanno lo stesso segno (−): si sommano i valori (${a} + ${b}) e si mantiene il segno meno.`
-              ],
-              commonErrors: {
-                [String(a + b)]: `Attenzione! Hai scritto +${a + b} applicando "meno per meno fa più", ma qui NON c'è una moltiplicazione! Stai sommando due debiti: −${a} e −${b}.`,
-                [`+${a + b}`]: `Attenzione! "Meno per meno fa più" vale solo per moltiplicazione e divisione. Qui stai sommando due numeri negativi: il risultato resta negativo!`
-              },
-              nextExpr: `${res}`
-            }
-          ]
-        };
-      } else if (type === 2) {
-        const a = r(2, 7), b = r(2, 6);
-        const isNeg2 = r(0, 1) === 1;
-        const res = isNeg2 ? a * b : -(a * b);
-        const exprStr = isNeg2 ? `(−${a}) · (−${b})` : `(−${a}) · (+${b})`;
-        return {
-          topicId: 4,
-          expression: exprStr,
-          steps: [
-            {
-              prompt: `Calcola il prodotto applicando la regola dei segni: <strong>${exprStr}</strong>`,
-              expected: isNeg2 ? [String(res), `+${res}`] : [String(res)],
-              hints: [
-                `Moltiplica prima i numeri (${a} · ${b} = ${a * b}) e poi applica la regola dei segni del prodotto.`,
-                isNeg2 ? `Segni concordi (− · −) danno risultato POSITIVO (+).` : `Segni discordi (− · +) danno risultato NEGATIVO (−).`
-              ],
-              commonErrors: {
-                [String(-res)]: `Controlla il segno! Nel prodotto: segni uguali danno +, segni diversi danno −.`
-              },
-              nextExpr: res > 0 ? `+${res}` : `${res}`
-            }
-          ]
-        };
-      } else {
-        const a = r(4, 10), b = r(2, 7);
-        const res = -a + b;
-        return {
-          topicId: 4,
-          expression: `−${a} − (−${b})`,
-          steps: [
-            {
-              prompt: `Prima togliamo la parentesi in <strong>−${a} − (−${b})</strong>.<br>Il segno <strong>−</strong> davanti alla parentesi cambia il segno interno: come diventa <strong>−(−${b})</strong>?`,
-              expected: [`+${b}`, String(b)],
-              hints: [`Un segno meno davanti a una parentesi trasforma (−${b}) nel suo opposto: +${b}.`],
-              commonErrors: {
-                [`-${b}`]: `Ricorda: il segno − davanti alla parentesi cambia il segno di ciò che c'è dentro! Quindi −(−${b}) diventa +${b}.`
-              },
-              nextExpr: `−${a} + ${b}`
-            },
-            {
-              prompt: `Esatto! Ora calcola <strong>−${a} + ${b}</strong>:`,
-              expected: res > 0 ? [String(res), `+${res}`] : [String(res)],
-              hints: [`Hanno segno diverso: fai la differenza tra ${Math.max(a,b)} e ${Math.min(a,b)} e metti il segno del numero più grande (${a > b ? '−' : '+'}).`],
-              commonErrors: {},
-              nextExpr: res > 0 ? `+${res}` : `${res}`
-            }
-          ]
-        };
-      }
-    }
-
-    if (topicId === 5) {
-      const b = pick([2, 3]);
-      const powVal = b * b;
-      const q = r(2, 5);
-      const divA = q * 2;
-      const addB = r(1, 4);
-      const quadra = -q + addB;
-      const mult = 2;
-      const prod = quadra * mult;
-      const finalRes = powVal + prod;
-
-      const expr = `(−${b})² + [ −${divA} : (+2) − (−${addB}) ] · ${mult}`;
-      return {
-        topicId: 5,
-        expression: expr,
-        steps: [
-          {
-            prompt: `Affrontiamo l'espressione completa:<br><strong>${expr}</strong><br>Passo 1: calcola la potenza <strong>(−${b})²</strong> (occhio alla parentesi!).`,
-            expected: [String(powVal), `+${powVal}`],
-            hints: [
-              `La base è (−${b}) ed è elevata a un esponente pari (2): (−${b}) · (−${b}) = +${powVal}.`
-            ],
-            commonErrors: {
-              [`-${powVal}`]: `Attenzione! Il segno meno è DENTRO la parentesi: (−${b}) · (−${b}) fa +${powVal} (meno per meno = più!).`
-            },
-            nextExpr: `+${powVal} + [ −${divA} : (+2) − (−${addB}) ] · ${mult}`
-          },
-          {
-            prompt: `Passo 2: dentro la parentesi quadra <strong>[ −${divA} : (+2) − (−${addB}) ]</strong>, esegui per prima la divisione <strong>−${divA} : (+2)</strong>:`,
-            expected: [`-${q}`],
-            hints: [`Dividi ${divA} per 2 e applica la regola dei segni (− : + = −).`],
-            commonErrors: {
-              [String(q)]: `Ricorda il segno! Negativo diviso positivo (− : +) dà risultato NEGATIVO (−${q}).`
-            },
-            nextExpr: `+${powVal} + [ −${q} + ${addB} ] · ${mult}`
-          },
-          {
-            prompt: `Passo 3: togliendo la tonda −(−${addB}) diventa +${addB}. Calcola ora il valore della quadra: <strong>−${q} + ${addB}</strong>:`,
-            expected: quadra > 0 ? [String(quadra), `+${quadra}`] : [String(quadra)],
-            hints: [`Fai la somma algebrica tra −${q} e +${addB}.`],
-            commonErrors: {},
-            nextExpr: `+${powVal} + (${quadra}) · ${mult}`
-          },
-          {
-            prompt: `Passo 4: ora abbiamo <strong>+${powVal} + (${quadra}) · ${mult}</strong>. Esegui prima la moltiplicazione <strong>(${quadra}) · ${mult}</strong>:`,
-            expected: prod > 0 ? [String(prod), `+${prod}`] : [String(prod)],
-            hints: [`Moltiplica ${quadra} per ${mult} facendo attenzione al segno.`],
-            commonErrors: {},
-            nextExpr: `+${powVal} ${prod >= 0 ? '+ ' + prod : '− ' + Math.abs(prod)}`
-          },
-          {
-            prompt: `Ultimo passaggio! Calcola <strong>+${powVal} ${prod >= 0 ? '+ ' + prod : '− ' + Math.abs(prod)}</strong>:`,
-            expected: finalRes > 0 ? [String(finalRes), `+${finalRes}`] : [String(finalRes)],
-            hints: [`Esegui l'ultima somma algebrica.`],
-            commonErrors: {},
-            nextExpr: `${finalRes}`
-          }
-        ]
-      };
-    }
-  }
-
-  const chatWindow = document.getElementById("chatWindow");
-  const userInput = document.getElementById("userInput");
-
-  function appendBotMessage(htmlContent, chips = []) {
-    const row = document.createElement("div");
-    row.className = "message-row bot";
-
-    const avatar = document.createElement("div");
-    avatar.className = "msg-avatar";
-    avatar.textContent = "∑";
-
-    const bubble = document.createElement("div");
-    bubble.className = "msg-bubble";
-    bubble.innerHTML = htmlContent;
-
-    if (chips.length > 0) {
-      const chipWrap = document.createElement("div");
-      chipWrap.className = "quick-replies";
-      chips.forEach(c => {
-        const btn = document.createElement("button");
-        btn.className = "chip-btn" + (c.secondary ? " secondary" : "");
-        btn.textContent = c.label;
-        btn.onclick = () => c.action();
-        chipWrap.appendChild(btn);
-      });
-      bubble.appendChild(chipWrap);
-    }
-
-    row.appendChild(avatar);
-    row.appendChild(bubble);
-    chatWindow.appendChild(row);
-    chatWindow.scrollTop = chatWindow.scrollHeight;
-  }
-
-  function appendUserMessage(text) {
-    const row = document.createElement("div");
-    row.className = "message-row user";
-
-    const bubble = document.createElement("div");
-    bubble.className = "msg-bubble";
-    bubble.textContent = text;
-
-    row.appendChild(bubble);
-    chatWindow.appendChild(row);
-    chatWindow.scrollTop = chatWindow.scrollHeight;
-  }
-
-  function showMenu() {
-    const chips = Object.values(TOPICS).map(t => ({
-      label: t.title,
-      action: () => selectTopic(t.id)
-    }));
-
-    appendBotMessage(
-      `Ciao! Sono <strong>MateBot</strong>, il tuo tutor personale di matematica.<br>
-      Lavoreremo <strong>un passaggio alla volta</strong>: se sbagli un calcolo, ti aiuterò a capire il perché senza darti subito la soluzione.<br><br>
-      <strong>Scegli l'argomento su cui vuoi allenarti oggi:</strong>`,
-      chips
-    );
-  }
-
-  function selectTopic(topicId) {
-    state.currentTopic = topicId;
-    const topic = TOPICS[topicId];
-    document.getElementById("currentTopicLabel").textContent = topic.short;
-
-    appendUserMessage(topic.title);
-    appendBotMessage(
-      `Ottima scelta! Ecco un rapido promemoria prima di iniziare:<div class="rule-card">${topic.rule}</div>`
-    );
-    startNewExercise();
-  }
-
-  function startNewExercise() {
-    if (!state.currentTopic) {
-      showMenu();
-      return;
-    }
-    const ex = generateExercise(state.currentTopic);
-    state.currentExercise = ex;
-    state.currentStepIndex = 0;
-    state.hintLevel = 0;
-
-    const firstStep = ex.steps[0];
-    appendBotMessage(
-      `<strong>Nuovo esercizio:</strong><span class="math-expr">${ex.expression}</span>${firstStep.prompt}`
-    );
-    userInput.focus();
-  }
-
-  function normalizeAnswer(str) {
-    return str
-      .trim()
-      .replace(/\s+/g, "")
-      .replace(/−/g, "-")
-      .replace(/–/g, "-")
-      .replace(/^\+/, "");
-  }
-
-  function handleUserSubmit() {
-    const raw = userInput.value.trim();
-    if (!raw) return;
-    userInput.value = "";
-    appendUserMessage(raw);
-
-    if (!state.currentExercise) {
-      showMenu();
-      return;
-    }
-
-    const ex = state.currentExercise;
-    const step = ex.steps[state.currentStepIndex];
-    const normUser = normalizeAnswer(raw);
-    const isCorrect = step.expected.some(ans => normalizeAnswer(ans) === normUser);
-
-    if (isCorrect) {
-      state.correctSteps++;
-      document.getElementById("stepCount").textContent = state.correctSteps;
-      state.currentStepIndex++;
-      state.hintLevel = 0;
-
-      if (state.currentStepIndex < ex.steps.length) {
-        const nextStep = ex.steps[state.currentStepIndex];
-        appendBotMessage(
-          `<div class="feedback-box feedback-ok">✅ <strong>Corretto!</strong> Espressione aggiornata: <strong>${step.nextExpr}</strong></div>
-          <div style="margin-top:8px;">${nextStep.prompt}</div>`
-        );
-      } else {
-        state.solvedExercises++;
-        state.completedByTopic[state.currentTopic]++;
-        document.getElementById("solvedCount").textContent = state.solvedExercises;
-
-        appendBotMessage(
-          `<div class="feedback-box feedback-ok">🎉 <strong>Esercizio completato!</strong> Risultato finale: <strong>${step.nextExpr}</strong></div>
-          <div style="margin-top:8px;">Cosa vuoi fare adesso?</div>`,
-          [
-            { label: "➡️ Altro esercizio su questo argomento", action: () => startNewExercise() },
-            { label: "📚 Cambia argomento", secondary: true, action: () => showMenu() },
-            { label: "📋 Vedi scheda finale", secondary: true, action: () => openReport() }
-          ]
-        );
-        state.currentExercise = null;
-      }
-    } else {
-      const tTitle = TOPICS[state.currentTopic].short;
-      state.errorsByTopic[tTitle] = (state.errorsByTopic[tTitle] || 0) + 1;
-
-      let customFeedback = null;
-      if (step.commonErrors) {
-        for (const [errKey, msg] of Object.entries(step.commonErrors)) {
-          if (normalizeAnswer(errKey) === normUser) {
-            customFeedback = msg;
-            break;
-          }
-        }
-      }
-
-      if (customFeedback) {
-        appendBotMessage(
-          `<div class="feedback-box feedback-err">❌ <strong>Non esattamente.</strong> ${customFeedback}</div>
-          <div style="margin-top:8px;">Riprova questo passaggio!</div>`
-        );
-      } else {
-        appendBotMessage(
-          `<div class="feedback-box feedback-err">❌ <strong>Risposta non corretta.</strong> Controlla bene le precedenze e i segni, poi riprova.</div>`,
-          [
-            { label: "💡 Chiedi un indizio", secondary: true, action: () => requestHint() }
-          ]
-        );
-      }
-    }
-    userInput.focus();
-  }
-
-  function requestHint() {
-    if (!state.currentExercise) {
-      appendBotMessage("Scegli prima un argomento dal menu per iniziare un esercizio!");
-      return;
-    }
-    const step = state.currentExercise.steps[state.currentStepIndex];
-    const hintIdx = Math.min(state.hintLevel, step.hints.length - 1);
-    const hintText = step.hints[hintIdx];
-    state.hintLevel++;
-
-    appendBotMessage(
-      `<div class="feedback-box feedback-hint">💡 <strong>Indizio ${state.hintLevel}:</strong> ${hintText}</div>`
-    );
-    userInput.focus();
-  }
-
-  function showRuleReminder() {
-    if (!state.currentTopic) {
-      showMenu();
-      return;
-    }
-    const topic = TOPICS[state.currentTopic];
-    appendBotMessage(`<div class="rule-card">${topic.rule}</div>`);
-  }
-
-  function skipExercise() {
-    if (!state.currentTopic) {
-      showMenu();
-      return;
-    }
-    appendBotMessage("Nessun problema, passiamo a un altro esercizio!");
-    startNewExercise();
-  }
-
-  function insertChar(ch) {
-    const start = userInput.selectionStart;
-    const end = userInput.selectionEnd;
-    const val = userInput.value;
-    userInput.value = val.slice(0, start) + ch + val.slice(end);
-    userInput.focus();
-    userInput.setSelectionRange(start + ch.length, start + ch.length);
-  }
-
-  function backspaceChar() {
-    const start = userInput.selectionStart;
-    const end = userInput.selectionEnd;
-    const val = userInput.value;
-    if (start !== end) {
-      userInput.value = val.slice(0, start) + val.slice(end);
-      userInput.setSelectionRange(start, start);
-    } else if (start > 0) {
-      userInput.value = val.slice(0, start - 1) + val.slice(start);
-      userInput.setSelectionRange(start - 1, start - 1);
-    }
-    userInput.focus();
-  }
-
-  userInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      handleUserSubmit();
-    }
-  });
-
-  function updateReportText() {
-    const name = document.getElementById("studentNameInput").value.trim() || "Studente";
-    const now = new Date().toLocaleDateString("it-IT");
-    const lines = [
-      `RIEPILOGO ATTIVITÀ MATEBOT`,
-      `Studente: ${name} | Data: ${now}`,
-      `----------------------------------------`,
-      `• Esercizi completati: ${state.solvedExercises}`,
-      `• Passaggi risolti correttamente: ${state.correctSteps}`,
-      ``,
-      `Dettaglio per argomento:`
-    ];
-
-    Object.values(TOPICS).forEach(t => {
-      const done = state.completedByTopic[t.id] || 0;
-      lines.push(`- ${t.short}: ${done} esercizi completati`);
-    });
-
-    const errKeys = Object.keys(state.errorsByTopic);
-    if (errKeys.length > 0) {
-      lines.push(``, `Aree su cui esercitarsi ancora:`);
-      errKeys.forEach(k => {
-        lines.push(`- ${k} (${state.errorsByTopic[k]} tentativi da rivedere)`);
-      });
-    }
-
-    document.getElementById("reportContent").textContent = lines.join("\n");
-  }
-
-  function openReport() {
-    updateReportText();
-    document.getElementById("reportModal").classList.add("active");
-  }
-
-  function closeReport() {
-    document.getElementById("reportModal").classList.remove("active");
-  }
-
-  function copyReport() {
-    const text = document.getElementById("reportContent").textContent;
-    navigator.clipboard.writeText(text).then(() => {
-      alert("Riepilogo copiato negli appunti! Ora puoi incollarlo per il docente.");
-    });
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", showMenu);
-  } else {
-    showMenu();
-  }
-</script>
-</body>
-</html>
+              prompt: `Ora
