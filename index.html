@@ -1,1305 +1,1915 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>MateBot — Tutor Interattivo di Matematica</title>
-  <style>
-    :root {
-      --bg: #f1f5f9;
-      --surface: #ffffff;
-      --primary: #1e40af;
-      --primary-light: #dbeafe;
-      --primary-hover: #1d4ed8;
-      --accent: #0d9488;
-      --accent-light: #ccfbf1;
-      --bot-bubble: #ffffff;
-      --user-bubble: #1e40af;
-      --text-main: #0f172a;
-      --text-muted: #475569;
-      --border: #e2e8f0;
-      --success: #16a34a;
-      --success-bg: #dcfce7;
-      --warning: #d97706;
-      --warning-bg: #fef3c7;
-      --danger: #dc2626;
-      --danger-bg: #fee2e2;
-      --shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
-      --radius: 16px;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MateBot – Tutor Interattivo di Matematica</title>
+    <style>
+        /* ==========================================================================
+           VARIABILI E DESIGN SYSTEM (Alto Contrasto & Accessibilità Adulti/CPIA)
+           ========================================================================== */
+        :root {
+            --bg-app: #f1f5f9;
+            --bg-surface: #ffffff;
+            --bg-chat: #f8fafc;
+            --primary: #1e40af;       /* Blu istituzionale profondo */
+            --primary-hover: #1d4ed8;
+            --primary-light: #dbeafe;
+            --secondary: #0f766e;     /* Verde ottanio per successi */
+            --secondary-light: #ccfbf1;
+            --accent: #b45309;        /* Ambra scuro per indizi/attenzione */
+            --accent-light: #fef3c7;
+            --danger: #b91c1c;        /* Rosso scuro per errori */
+            --danger-light: #fee2e2;
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --border-color: #cbd5e1;
+            --bot-bubble: #ffffff;
+            --user-bubble: #1e40af;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+            --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+            --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+        }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-    body {
-      background-color: var(--bg);
-      color: var(--text-main);
-      display: flex;
-      justify-content: center;
-      min-height: 100dvh;
-    }
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg-app);
+            color: var(--text-main);
+            line-height: 1.5;
+            height: 100vh;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
 
-    .app-container {
-      width: 100%;
-      max-width: 780px;
-      background: var(--surface);
-      display: flex;
-      flex-direction: column;
-      height: 100dvh;
-      box-shadow: var(--shadow);
-      position: relative;
-      overflow: hidden;
-    }
+        /* ==========================================================================
+           LAYOUT PRINCIPALE E HEADER
+           ========================================================================== */
+        .app-container {
+            max-width: 960px;
+            width: 100%;
+            height: 100%;
+            margin: 0 auto;
+            background-color: var(--bg-surface);
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-md);
+            position: relative;
+        }
 
-    /* HEADER */
-    header {
-      background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%);
-      color: white;
-      padding: 14px 18px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      flex-shrink: 0;
-      z-index: 10;
-    }
+        header {
+            background-color: var(--bg-surface);
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 10;
+        }
 
-    .bot-identity {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
 
-    .bot-avatar {
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      background: #ffffff;
-      color: var(--primary);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 800;
-      font-size: 1.25rem;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-      flex-shrink: 0;
-    }
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-    .bot-info h1 {
-      font-size: 1.05rem;
-      font-weight: 700;
-      letter-spacing: 0.2px;
-    }
+        .bot-avatar-header {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #1e40af, #3b82f6);
+            color: white;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
 
-    .bot-info p {
-      font-size: 0.78rem;
-      opacity: 0.9;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
+        .brand-text h1 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-main);
+            line-height: 1.2;
+        }
 
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #4ade80;
-      display: inline-block;
-    }
+        .brand-text span {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            display: block;
+        }
 
-    .header-actions {
-      display: flex;
-      gap: 8px;
-    }
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
-    .btn-header {
-      background: rgba(255, 255, 255, 0.16);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      color: white;
-      padding: 6px 11px;
-      border-radius: 8px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
+        .score-badge {
+            background-color: var(--primary-light);
+            color: var(--primary);
+            font-weight: 700;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
 
-    .btn-header:hover {
-      background: rgba(255, 255, 255, 0.28);
-    }
+        .btn-report {
+            background-color: var(--secondary);
+            color: white;
+            border: none;
+            padding: 7px 12px;
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
 
-    /* PROGRESS & TOPIC BAR */
-    .status-bar {
-      background: #f8fafc;
-      border-bottom: 1px solid var(--border);
-      padding: 8px 18px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-size: 0.82rem;
-      color: var(--text-muted);
-      flex-shrink: 0;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
+        .btn-report:hover {
+            opacity: 0.92;
+        }
 
-    .topic-badge {
-      background: var(--primary-light);
-      color: var(--primary);
-      font-weight: 700;
-      padding: 3px 10px;
-      border-radius: 999px;
-      font-size: 0.78rem;
-    }
+        /* Selettore Moduli e Barra Avanzamento */
+        .module-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
 
-    .score-pill {
-      font-weight: 600;
-      color: var(--text-main);
-    }
+        .select-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
-    /* CHAT AREA */
-    .chat-window {
-      flex: 1;
-      overflow-y: auto;
-      padding: 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      background-color: #f1f5f9;
-      scroll-behavior: smooth;
-    }
+        .select-wrapper label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
 
-    .message-row {
-      display: flex;
-      gap: 10px;
-      max-width: 88%;
-      animation: fadeIn 0.25s ease-out;
-    }
+        select#module-select {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1.5px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-main);
+            background-color: var(--bg-chat);
+            cursor: pointer;
+            outline: none;
+        }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+        select#module-select:focus {
+            border-color: var(--primary);
+        }
 
-    .message-row.bot {
-      align-self: flex-start;
-    }
+        .progress-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-    .message-row.user {
-      align-self: flex-end;
-      flex-direction: row-reverse;
-    }
+        .progress-bar-bg {
+            flex: 1;
+            height: 8px;
+            background-color: #e2e8f0;
+            border-radius: 99px;
+            overflow: hidden;
+        }
 
-    .msg-avatar {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background: var(--primary);
-      color: white;
-      font-size: 0.85rem;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      margin-top: 2px;
-    }
+        .progress-bar-fill {
+            height: 100%;
+            background-color: var(--secondary);
+            width: 0%;
+            transition: width 0.4s ease;
+            border-radius: 99px;
+        }
 
-    .msg-bubble {
-      padding: 12px 16px;
-      border-radius: var(--radius);
-      font-size: 0.96rem;
-      line-height: 1.5;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-      word-wrap: break-word;
-    }
+        .progress-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            min-width: 95px;
+            text-align: right;
+        }
 
-    .message-row.bot .msg-bubble {
-      background: var(--bot-bubble);
-      color: var(--text-main);
-      border-top-left-radius: 4px;
-      border: 1px solid var(--border);
-    }
+        /* ==========================================================================
+           AREA CHAT CONVERSAZIONALE
+           ========================================================================== */
+        #chat-window {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            background-color: var(--bg-chat);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            scroll-behavior: smooth;
+        }
 
-    .message-row.user .msg-bubble {
-      background: var(--user-bubble);
-      color: #ffffff;
-      border-top-right-radius: 4px;
-    }
+        .message-row {
+            display: flex;
+            gap: 10px;
+            max-width: 88%;
+            animation: fadeIn 0.25s ease-out;
+        }
 
-    .math-expr {
-      display: block;
-      background: #f8fafc;
-      border-left: 4px solid var(--primary);
-      padding: 10px 14px;
-      margin: 10px 0;
-      font-family: "Cambria Math", "Times New Roman", Courier, monospace;
-      font-size: 1.22rem;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      color: #0f172a;
-      border-radius: 6px;
-    }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-    .feedback-box {
-      margin-top: 8px;
-      padding: 9px 12px;
-      border-radius: 8px;
-      font-size: 0.9rem;
-    }
+        .message-row.bot {
+            align-self: flex-start;
+        }
 
-    .feedback-ok {
-      background: var(--success-bg);
-      color: #14532d;
-      border-left: 3px solid var(--success);
-    }
+        .message-row.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
 
-    .feedback-err {
-      background: var(--danger-bg);
-      color: #7f1d1d;
-      border-left: 3px solid var(--danger);
-    }
+        .avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 700;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
 
-    .feedback-hint {
-      background: var(--warning-bg);
-      color: #78350f;
-      border-left: 3px solid var(--warning);
-    }
+        .message-row.bot .avatar {
+            background-color: var(--primary-light);
+            color: var(--primary);
+            border: 1px solid #bfdbfe;
+        }
 
-    .rule-card {
-      background: #eff6ff;
-      border: 1px solid #bfdbfe;
-      border-radius: 10px;
-      padding: 10px 12px;
-      margin-top: 8px;
-      font-size: 0.88rem;
-      color: #1e3a8a;
-    }
+        .message-row.user .avatar {
+            background-color: #e2e8f0;
+            color: var(--text-main);
+        }
 
-    /* QUICK REPLIES & TOPIC CARDS */
-    .quick-replies {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 10px;
-    }
+        .bubble {
+            padding: 12px 16px;
+            border-radius: var(--radius-lg);
+            font-size: 1rem;
+            line-height: 1.55;
+            box-shadow: var(--shadow-sm);
+            word-wrap: break-word;
+        }
 
-    .chip-btn {
-      background: #ffffff;
-      border: 1.5px solid var(--primary);
-      color: var(--primary);
-      padding: 8px 13px;
-      border-radius: 999px;
-      font-size: 0.86rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.15s;
-      text-align: left;
-    }
+        .message-row.bot .bubble {
+            background-color: var(--bot-bubble);
+            color: var(--text-main);
+            border: 1px solid #e2e8f0;
+            border-top-left-radius: 4px;
+        }
 
-    .chip-btn:hover {
-      background: var(--primary);
-      color: #ffffff;
-    }
+        .message-row.user .bubble {
+            background-color: var(--user-bubble);
+            color: #ffffff;
+            border-top-right-radius: 4px;
+        }
 
-    .chip-btn.secondary {
-      border-color: var(--accent);
-      color: var(--accent);
-    }
+        /* Formattazione Matematica e Riquadri Didattici dentro la chat */
+        .math-expr {
+            font-family: var(--font-mono);
+            font-size: 1.15rem;
+            font-weight: 700;
+            background-color: #f1f5f9;
+            color: #0f172a;
+            padding: 8px 14px;
+            border-radius: var(--radius-sm);
+            border-left: 4px solid var(--primary);
+            margin: 8px 0;
+            display: block;
+            letter-spacing: 0.5px;
+        }
 
-    .chip-btn.secondary:hover {
-      background: var(--accent);
-      color: #ffffff;
-    }
+        .rule-card {
+            background-color: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: var(--radius-md);
+            padding: 12px;
+            margin: 8px 0;
+        }
 
-    /* KEYPAD & INPUT AREA */
-    .input-section {
-      background: var(--surface);
-      border-top: 1px solid var(--border);
-      padding: 10px 14px 14px;
-      flex-shrink: 0;
-    }
+        .rule-card h4 {
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 0.98rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
 
-    .math-keypad {
-      display: flex;
-      gap: 6px;
-      margin-bottom: 8px;
-      overflow-x: auto;
-      padding-bottom: 2px;
-    }
+        .rule-card ul {
+            padding-left: 20px;
+            margin-bottom: 8px;
+        }
 
-    .key-btn {
-      background: #f1f5f9;
-      border: 1px solid #cbd5e1;
-      color: var(--text-main);
-      font-weight: 700;
-      font-size: 0.95rem;
-      min-width: 36px;
-      height: 34px;
-      padding: 0 8px;
-      border-radius: 8px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
+        .rule-card li {
+            margin-bottom: 4px;
+            font-size: 0.95rem;
+        }
 
-    .key-btn:active {
-      background: #cbd5e1;
-    }
+        .feedback-box {
+            padding: 10px 12px;
+            border-radius: var(--radius-sm);
+            margin-top: 6px;
+            font-size: 0.95rem;
+        }
 
-    .input-row {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
+        .feedback-success {
+            background-color: var(--secondary-light);
+            color: #115e59;
+            border-left: 4px solid var(--secondary);
+        }
 
-    #userInput {
-      flex: 1;
-      padding: 11px 14px;
-      border: 1.5px solid #cbd5e1;
-      border-radius: 12px;
-      font-size: 1rem;
-      outline: none;
-      transition: border-color 0.2s;
-    }
+        .feedback-error {
+            background-color: var(--danger-light);
+            color: #991b1b;
+            border-left: 4px solid var(--danger);
+        }
 
-    #userInput:focus {
-      border-color: var(--primary);
-    }
+        .feedback-hint {
+            background-color: var(--accent-light);
+            color: #92400e;
+            border-left: 4px solid var(--accent);
+        }
 
-    .btn-send {
-      background: var(--primary);
-      color: white;
-      border: none;
-      padding: 11px 18px;
-      border-radius: 12px;
-      font-weight: 700;
-      font-size: 0.95rem;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
+        /* ==========================================================================
+           AREA INTERAZIONE INFERIORE (Quick Replies, Tastierino e Input)
+           ========================================================================== */
+        .interaction-area {
+            background-color: var(--bg-surface);
+            border-top: 1px solid var(--border-color);
+            padding: 10px 14px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
 
-    .btn-send:hover {
-      background: var(--primary-hover);
-    }
+        /* Pulsanti di Risposta Rapida / Opzioni */
+        .quick-actions {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            scrollbar-width: thin;
+        }
 
-    .helper-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 8px;
-      font-size: 0.8rem;
-    }
+        .chip-btn {
+            background-color: var(--bg-chat);
+            color: var(--primary);
+            border: 1.5px solid #bfdbfe;
+            padding: 7px 13px;
+            border-radius: 20px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.15s;
+            flex-shrink: 0;
+        }
 
-    .helper-links {
-      display: flex;
-      gap: 12px;
-    }
+        .chip-btn:hover {
+            background-color: var(--primary-light);
+            border-color: var(--primary);
+        }
 
-    .link-btn {
-      background: none;
-      border: none;
-      color: var(--primary);
-      font-weight: 600;
-      cursor: pointer;
-      font-size: 0.82rem;
-      text-decoration: underline;
-    }
+        .chip-btn.hint-btn {
+            color: var(--accent);
+            border-color: #fde68a;
+            background-color: #fffbeb;
+        }
 
-    /* MODAL REPORT */
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(15, 23, 42, 0.55);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-      z-index: 50;
-    }
+        .chip-btn.hint-btn:hover {
+            background-color: var(--accent-light);
+        }
 
-    .modal-overlay.active {
-      display: flex;
-    }
+        .chip-btn.choice-btn {
+            background-color: #eff6ff;
+            border-color: var(--primary);
+            font-family: var(--font-mono);
+            font-size: 0.92rem;
+        }
 
-    .modal-card {
-      background: white;
-      width: 100%;
-      max-width: 500px;
-      border-radius: 16px;
-      padding: 22px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-      max-height: 90dvh;
-      overflow-y: auto;
-    }
+        /* Tastiera Matematica Compatta */
+        .math-keypad {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
 
-    .modal-card h2 {
-      font-size: 1.2rem;
-      color: var(--primary);
-      margin-bottom: 10px;
-    }
+        .keypad-label {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-right: 4px;
+        }
 
-    .report-box {
-      background: #f8fafc;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 14px;
-      font-size: 0.9rem;
-      line-height: 1.6;
-      white-space: pre-line;
-      margin: 12px 0;
-    }
+        .key-btn {
+            background-color: #f1f5f9;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            font-family: var(--font-mono);
+            font-weight: 700;
+            font-size: 1rem;
+            min-width: 36px;
+            height: 34px;
+            padding: 0 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.1s;
+        }
 
-    .modal-actions {
-      display: flex;
-      gap: 10px;
-      justify-content: flex-end;
-      margin-top: 14px;
-    }
+        .key-btn:hover {
+            background-color: #e2e8f0;
+        }
 
-    .btn-primary {
-      background: var(--primary);
-      color: white;
-      border: none;
-      padding: 9px 16px;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-    }
+        .key-btn:active {
+            transform: scale(0.96);
+        }
 
-    .btn-secondary {
-      background: #e2e8f0;
-      color: var(--text-main);
-      border: none;
-      padding: 9px 16px;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-    }
+        /* Form Input Principale */
+        .input-form {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
 
-    @media (max-width: 520px) {
-      .message-row { max-width: 94%; }
-      header { padding: 10px 14px; }
-      .bot-info p { display: none; }
-    }
-  </style>
+        #user-input {
+            flex: 1;
+            padding: 11px 14px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            font-family: var(--font-sans);
+            color: var(--text-main);
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        #user-input:focus {
+            border-color: var(--primary);
+        }
+
+        #send-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 11px 20px;
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        #send-btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        /* ==========================================================================
+           MODALE REPORT FINALE (Per consegna al docente)
+           ========================================================================== */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(15, 23, 42, 0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            z-index: 100;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-card {
+            background-color: var(--bg-surface);
+            border-radius: var(--radius-lg);
+            max-width: 560px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 24px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+        }
+
+        .modal-header h2 {
+            font-size: 1.25rem;
+            color: var(--primary);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .student-name-group {
+            margin-bottom: 16px;
+        }
+
+        .student-name-group label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .student-name-group input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1.5px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            font-size: 0.95rem;
+        }
+
+        .report-summary-box {
+            background-color: var(--bg-chat);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 14px;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            white-space: pre-wrap;
+            margin-bottom: 16px;
+            color: var(--text-main);
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .btn-copy {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-print {
+            background-color: var(--secondary);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .copy-toast {
+            font-size: 0.85rem;
+            color: var(--secondary);
+            font-weight: 600;
+            margin-top: 8px;
+            display: none;
+        }
+
+        @media (max-width: 600px) {
+            .message-row { max-width: 94%; }
+            .brand-text span { display: none; }
+            .key-btn { min-width: 32px; height: 32px; font-size: 0.92rem; }
+            .keypad-label { display: none; }
+        }
+
+        @media print {
+            body * { visibility: hidden; }
+            .modal-card, .modal-card * { visibility: visible; }
+            .modal-card {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                box-shadow: none;
+            }
+            .modal-footer, .close-modal { display: none; }
+        }
+    </style>
 </head>
 <body>
 
 <div class="app-container">
-  <header>
-    <div class="bot-identity">
-      <div class="bot-avatar">∑</div>
-      <div class="bot-info">
-        <h1>MateBot · Tutor di Matematica</h1>
-        <p><span class="status-dot"></span> Guida passo-passo · Aritmetica e Numeri Interi</p>
-      </div>
-    </div>
-    <div class="header-actions">
-      <button class="btn-header" onclick="showMenu()">Argomenti</button>
-      <button class="btn-header" onclick="openReport()">Scheda Finale</button>
-    </div>
-  </header>
+    <!-- HEADER CON SELEZIONE MODULO E STATISTICHE -->
+    <header>
+        <div class="header-top">
+            <div class="brand">
+                <div class="bot-avatar-header">MB</div>
+                <div class="brand-text">
+                    <h1>MateBot – Tutor di Matematica</h1>
+                    <span>Percorso guidato di calcolo numerico ed espressioni</span>
+                </div>
+            </div>
+            <div class="header-actions">
+                <div class="score-badge" title="Punteggio accumulato">
+                    <span>★</span> <span id="score-display">0 pt</span>
+                </div>
+                <button type="button" class="btn-report" id="open-report-btn" title="Visualizza e copia il riepilogo per il docente">
+                    📋 Riepilogo
+                </button>
+            </div>
+        </div>
 
-  <div class="status-bar">
-    <div>Modulo: <span class="topic-badge" id="currentTopicLabel">Inizio percorso</span></div>
-    <div class="score-pill">Esercizi risolti: <span id="solvedCount">0</span> · Passaggi corretti: <span id="stepCount">0</span></div>
-  </div>
+        <div class="module-controls">
+            <div class="select-wrapper">
+                <label for="module-select">Argomento:</label>
+                <select id="module-select">
+                    <option value="mod1">Modulo 1: Ordine delle 4 operazioni (PEMDAS)</option>
+                    <option value="mod2">Modulo 2: Uso delle parentesi (tonde, quadre, graffe)</option>
+                    <option value="mod3">Modulo 3: Le potenze e le loro proprietà</option>
+                    <option value="mod4">Modulo 4: Numeri interi (ℤ) e regole dei segni</option>
+                    <option value="mod5">Modulo 5: Espressioni complete con interi e potenze</option>
+                </select>
+            </div>
+            <div class="progress-container">
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="progress-fill"></div>
+                </div>
+                <div class="progress-label" id="progress-text">0 / 4 esercizi</div>
+            </div>
+        </div>
+    </header>
 
-  <div class="chat-window" id="chatWindow"></div>
+    <!-- FINESTRA DI CHAT CONVERSAZIONALE -->
+    <main id="chat-window" aria-live="polite"></main>
 
-  <div class="input-section">
-    <div class="math-keypad" aria-label="Tastierino rapido">
-      <button class="key-btn" onclick="insertChar('+')">+</button>
-      <button class="key-btn" onclick="insertChar('-')">−</button>
-      <button class="key-btn" onclick="insertChar('·')">·</button>
-      <button class="key-btn" onclick="insertChar(':')">:</button>
-      <button class="key-btn" onclick="insertChar('(')">(</button>
-      <button class="key-btn" onclick="insertChar(')')">)</button>
-      <button class="key-btn" onclick="insertChar('[')">[</button>
-      <button class="key-btn" onclick="insertChar(']')">]</button>
-      <button class="key-btn" onclick="insertChar('^')">^ (potenza)</button>
-      <button class="key-btn" onclick="backspaceChar()">⌫</button>
-    </div>
-    <div class="input-row">
-      <input type="text" id="userInput" placeholder="Scrivi qui il risultato o il passaggio..." autocomplete="off" />
-      <button class="btn-send" onclick="handleUserSubmit()">Invia</button>
-    </div>
-    <div class="helper-bar">
-      <div class="helper-links">
-        <button class="link-btn" onclick="requestHint()">💡 Dammi un indizio</button>
-        <button class="link-btn" onclick="showRuleReminder()">📘 Ripassa la regola</button>
-      </div>
-      <button class="link-btn" onclick="skipExercise()">Salta esercizio →</button>
-    </div>
-  </div>
+    <!-- AREA DI INTERAZIONE (RISPOSTE RAPIDE, TASTIERINO, INPUT) -->
+    <footer class="interaction-area">
+        <div class="quick-actions" id="quick-actions">
+            <!-- Popolato dinamicamente dal motore del tutor -->
+        </div>
+
+        <div class="math-keypad" aria-label="Tastiera simboli matematici">
+            <span class="keypad-label">Simboli:</span>
+            <button type="button" class="key-btn" data-insert="+">+</button>
+            <button type="button" class="key-btn" data-insert="-">-</button>
+            <button type="button" class="key-btn" data-insert="×">×</button>
+            <button type="button" class="key-btn" data-insert="÷">÷</button>
+            <button type="button" class="key-btn" data-insert="^">^</button>
+            <button type="button" class="key-btn" data-insert="(">(</button>
+            <button type="button" class="key-btn" data-insert=")">)</button>
+            <button type="button" class="key-btn" id="clear-input-btn" title="Cancella testo">⌫</button>
+        </div>
+
+        <form class="input-form" id="chat-form">
+            <input 
+                type="text" 
+                id="user-input" 
+                placeholder="Scrivi qui la tua risposta o il risultato del passaggio..." 
+                autocomplete="off"
+                aria-label="Risposta dello studente"
+            >
+            <button type="submit" id="send-btn">Invia</button>
+        </form>
+    </footer>
 </div>
 
-<!-- MODAL REPORT FINALE -->
-<div class="modal-overlay" id="reportModal">
-  <div class="modal-card">
-    <h2>📋 Riepilogo Attività Studente</h2>
-    <p style="font-size:0.88rem; color:var(--text-muted);">Puoi copiare questo riepilogo e inviarlo al tuo docente su Moodle, Classroom o via email.</p>
-    <div style="margin-top:10px;">
-      <label style="font-size:0.85rem; font-weight:600;">Nome e Cognome (opzionale):</label>
-      <input type="text" id="studentNameInput" placeholder="Es. Mario Rossi" oninput="updateReportText()" style="width:100%; padding:8px; margin-top:4px; border:1px solid #cbd5e1; border-radius:8px;" />
+<!-- MODALE REPORT FINALE PER IL DOCENTE -->
+<div class="modal-overlay" id="report-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h2 id="modal-title">Scheda di Riepilogo Competenze</h2>
+            <button type="button" class="close-modal" id="close-report-btn" aria-label="Chiudi">&times;</button>
+        </div>
+        <div class="student-name-group">
+            <label for="student-name-input">Nome e Cognome dello studente (opzionale):</label>
+            <input type="text" id="student-name-input" placeholder="Es. Marco Rossi - Classe 1A">
+        </div>
+        <div class="report-summary-box" id="report-content"></div>
+        <div class="modal-footer">
+            <button type="button" class="btn-copy" id="copy-report-btn">📄 Copia testo per il docente</button>
+            <button type="button" class="btn-print" id="print-report-btn">🖨️ Stampa / Salva PDF</button>
+        </div>
+        <div class="copy-toast" id="copy-toast">✓ Riepilogo copiato negli appunti! Ora puoi incollarlo su Classroom o inviarlo al docente.</div>
     </div>
-    <div class="report-box" id="reportContent"></div>
-    <div class="modal-actions">
-      <button class="btn-secondary" onclick="closeReport()">Chiudi</button>
-      <button class="btn-primary" onclick="copyReport()">Copia Riepilogo</button>
-    </div>
-  </div>
 </div>
 
 <script>
-  // --- STATO DELL'APPLICAZIONE ---
-  const state = {
-    currentTopic: null,
-    currentExercise: null,
-    currentStepIndex: 0,
-    hintLevel: 0,
-    solvedExercises: 0,
-    correctSteps: 0,
-    errorsByTopic: {},
-    completedByTopic: {
-      1: 0, 2: 0, 3: 0, 4: 0, 5: 0
-    },
-    history: []
-  };
+/**
+ * ============================================================================
+ * MATEBOT - MOTORE DIDATTICO CONVERSAZIONALE SOCRATICO
+ * Progettato per l'apprendimento autonomo di studenti adulti (CPIA / Biennio)
+ * ============================================================================
+ */
 
-  const TOPICS = {
-    1: {
-      id: 1,
-      title: "1. Ordine delle 4 operazioni",
-      short: "4 Operazioni & Sinistra → Destra",
-      rule: `<strong>Regole d'oro senza parentesi:</strong><br>
-             1️⃣ Prima si eseguono <strong>moltiplicazioni (·) e divisioni (:)</strong>.<br>
-             2️⃣ Poi si eseguono <strong>addizioni (+) e sottrazioni (−)</strong>.<br>
-             3️⃣ A parità di precedenza (es. solo + e −, oppure solo · e :), si procede rigorosamente <strong>da sinistra verso destra</strong>.`
+// 1. CONTENUTI TEORICI SINTETICI E CHIARI PER OGNI MODULO
+const MODULES_INFO = {
+    mod1: {
+        title: "Modulo 1: Ordine delle 4 operazioni",
+        targetExercises: 4,
+        theoryHTML: `
+            <div class="rule-card">
+                <h4>📘 Regola fondamentale: la priorità delle operazioni</h4>
+                <p>In un'espressione senza parentesi, non si calcola sempre nell'ordine in cui si legge, ma si segue una gerarchia precisa:</p>
+                <ul>
+                    <li><strong>1° livello (Priorità alta):</strong> si eseguono prima <strong>moltiplicazioni (×) e divisioni (÷)</strong>.</li>
+                    <li><strong>2° livello (Priorità bassa):</strong> solo dopo si eseguono <strong>addizioni (+) e sottrazioni (-)</strong>.</li>
+                    <li><strong>A parità di livello:</strong> se ci sono solo × e ÷ (oppure solo + e -), si procede rigorosamente <strong>da sinistra verso destra</strong>.</li>
+                </ul>
+                <div class="math-expr">Esempio: 20 - 12 ÷ 3 + 2 × 4<br>
+                → Prima ÷ e ×: 20 - <strong>4</strong> + <strong>8</strong><br>
+                → Poi da sinistra a destra: <strong>16</strong> + 8 = <strong>24</strong></div>
+            </div>
+        `
     },
-    2: {
-      id: 2,
-      title: "2. Uso delle parentesi ( ), [ ], { }",
-      short: "Ordine con Parentesi",
-      rule: `<strong>Regola delle parentesi:</strong><br>
-             1️⃣ Prima si risolvono i calcoli nelle <strong>parentesi tonde ( )</strong>.<br>
-             2️⃣ Poi nelle <strong>parentesi quadre [ ]</strong>.<br>
-             3️⃣ Infine nelle <strong>parentesi graffe { }</strong>.<br>
-             <em>Dentro ogni parentesi valgono sempre le solite precedenze (prima · e :, poi + e − da sinistra a destra).</em>`
+    mod2: {
+        title: "Modulo 2: Uso delle parentesi",
+        targetExercises: 4,
+        theoryHTML: `
+            <div class="rule-card">
+                <h4>📘 Regola delle parentesi: dall'interno verso l'esterno</h4>
+                <p>Le parentesi servono a cambiare l'ordine normale delle operazioni, indicando ciò che va calcolato prima:</p>
+                <ul>
+                    <li><strong>1° passo:</strong> si risolvono prima i calcoli dentro le <strong>parentesi tonde ( ... )</strong>.</li>
+                    <li><strong>2° passo:</strong> poi quelli dentro le <strong>parentesi quadre [ ... ]</strong>.</li>
+                    <li><strong>3° passo:</strong> infine quelli dentro le <strong>parentesi graffe { ... }</strong>.</li>
+                </ul>
+                <p><em>Nota bene:</em> all'interno di ogni parentesi valgono sempre le regole di priorità (prima × e ÷, poi + e -). Una parentesi si elimina solo quando dentro resta un unico numero.</p>
+                <div class="math-expr">Esempio: 30 - [ 18 - (4 + 2 × 3) ]<br>
+                → Nella tonda prima ×: 30 - [ 18 - (4 + <strong>6</strong>) ]<br>
+                → Chiudo la tonda: 30 - [ 18 - <strong>10</strong> ]<br>
+                → Chiudo la quadra: 30 - <strong>8</strong> = <strong>22</strong></div>
+            </div>
+        `
     },
-    3: {
-      id: 3,
-      title: "3. Le potenze e le loro proprietà",
-      short: "Potenze e Proprietà",
-      rule: `<strong>Ricorda sulle potenze:</strong><br>
-             • <strong>Significato:</strong> 2³ = 2 · 2 · 2 = 8 (la base si moltiplica per se stessa, NON 2 · 3!).<br>
-             • <strong>Casi speciali:</strong> a⁰ = 1 (con a ≠ 0) e a¹ = a.<br>
-             • <strong>Stessa base:</strong> aᵐ · aⁿ = aᵐ⁺ⁿ (somma esponenti) | aᵐ : aⁿ = aᵐ⁻ⁿ (sottrai esponenti).<br>
-             • <strong>Potenza di potenza:</strong> (aᵐ)ⁿ = aᵐ·ⁿ (moltiplica esponenti).<br>
-             • <strong>Stesso esponente:</strong> aⁿ · bⁿ = (a · b)ⁿ | aⁿ : bⁿ = (a : b)ⁿ.`
+    mod3: {
+        title: "Modulo 3: Le potenze e le loro proprietà",
+        targetExercises: 4,
+        theoryHTML: `
+            <div class="rule-card">
+                <h4>📘 Le potenze e le 5 proprietà principali</h4>
+                <p>Una potenza <strong>aⁿ</strong> indica il prodotto della base <em>a</em> per se stessa <em>n</em> volte (es. 2³ = 2 × 2 × 2 = 8).</p>
+                <ul>
+                    <li><strong>Esponente 0 e 1:</strong> a¹ = a; qualsiasi numero (diverso da 0) elevato a 0 fa <strong>1</strong> (es. 7⁰ = 1).</li>
+                    <li><strong>Prodotto stessa base:</strong> si sommano gli esponenti → aᵐ × aⁿ = aᵐ⁺ⁿ</li>
+                    <li><strong>Quoziente stessa base:</strong> si sottraggono gli esponenti → aᵐ ÷ aⁿ = aᵐ⁻ⁿ</li>
+                    <li><strong>Potenza di potenza:</strong> si moltiplicano gli esponenti → (aᵐ)ⁿ = aᵐˣⁿ</li>
+                </ul>
+                <div class="math-expr">Esempi: 3² × 3³ = 3⁵ &nbsp;|&nbsp; 5⁶ ÷ 5⁴ = 5² = 25 &nbsp;|&nbsp; (2³)² = 2⁶</div>
+            </div>
+        `
     },
-    4: {
-      id: 4,
-      title: "4. Numeri interi (ℤ) e regole dei segni",
-      short: "Numeri Interi & Segni",
-      rule: `<strong>Attenzione a NON confondere somma e moltiplicazione!</strong><br>
-             🔹 <strong>Addizione/Sottrazione:</strong><br>
-             • Stesso segno → si sommano i valori e si mantiene il segno (es. −4 − 5 = −9).<br>
-             • Segno diverso → si fa la differenza e vince il segno del numero più grande in valore assoluto (es. −8 + 3 = −5).<br>
-             🔹 <strong>Moltiplicazione (·) e Divisione (:):</strong><br>
-             • Segni concordi (+ · + oppure − · −) → risultato <strong>POSITIVO (+)</strong>.<br>
-             • Segni discordi (+ · − oppure − · +) → risultato <strong>NEGATIVO (−)</strong>.<br>
-             🔹 <strong>Togliere le parentesi:</strong> +(−3) = −3 | −(−3) = +3.`
+    mod4: {
+        title: "Modulo 4: Numeri interi (ℤ) e regole dei segni",
+        targetExercises: 5,
+        theoryHTML: `
+            <div class="rule-card">
+                <h4>📘 Numeri relativi (+ e -) e regole dei segni</h4>
+                <p><strong>1. Somma algebrica (addizione e sottrazione):</strong></p>
+                <ul>
+                    <li><strong>Segni concordi (uguali):</strong> si conserva il segno e si <strong>sommano</strong> i valori (es. -4 - 5 = -9).</li>
+                    <li><strong>Segni discordi (diversi):</strong> si prende il segno del numero più grande in valore assoluto e si fa la <strong>differenza</strong> (es. -8 + 3 = -5).</li>
+                    <li><strong>Segni vicini:</strong> +(-a) = -a &nbsp;|&nbsp; -(-a) = +a.</li>
+                </ul>
+                <p><strong>2. Moltiplicazione e divisione (Regola dei segni):</strong></p>
+                <ul>
+                    <li>Segni <strong>uguali</strong> danno sempre <strong>+</strong>: (+)×(+) = + &nbsp;e&nbsp; (-)×(-) = +</li>
+                    <li>Segni <strong>diversi</strong> danno sempre <strong>-</strong>: (+)×(-) = - &nbsp;e&nbsp; (-)×(+) = -</li>
+                </ul>
+            </div>
+        `
     },
-    5: {
-      id: 5,
-      title: "5. Espressioni complete con numeri interi",
-      short: "Espressioni in ℤ",
-      rule: `<strong>Strategia completa per le espressioni in ℤ:</strong><br>
-             1️⃣ Calcola le <strong>potenze</strong> (attenzione: (−2)² = +4, ma −2² = −4!).<br>
-             2️⃣ Risolvi dentro le parentesi: prima <strong>tonde ( )</strong>, poi <strong>quadre [ ]</strong>, poi <strong>graffe { }</strong>.<br>
-             3️⃣ Dentro ogni parentesi: prima <strong>moltiplicazioni e divisioni</strong> (con regola dei segni), poi <strong>somme algebriche</strong>.<br>
-             4️⃣ Ricopia con ordine tutto il resto dell'espressione ad ogni riga.`
+    mod5: {
+        title: "Modulo 5: Espressioni complete con interi e potenze",
+        targetExercises: 4,
+        theoryHTML: `
+            <div class="rule-card">
+                <h4>📘 Sfida Finale: Metodo completo passo-passo</h4>
+                <p>Per risolvere un'espressione completa senza errori, segui questa scaletta:</p>
+                <ul>
+                    <li><strong>1.</strong> Calcola le <strong>potenze</strong> (e applica le proprietà se hanno la stessa base).</li>
+                    <li><strong>2.</strong> Risolvi le parentesi dall'interno verso l'esterno: <strong>( ) → [ ] → { }</strong>.</li>
+                    <li><strong>3.</strong> Dentro ogni parentesi esegui prima <strong>× e ÷</strong> (con la regola dei segni), poi <strong>+ e -</strong>.</li>
+                    <li><strong>4.</strong> Attenzione alle potenze di numeri negativi: <strong>(-3)² = +9</strong> (esponente pari → +), mentre <strong>(-3)³ = -27</strong> (esponente dispari → -).</li>
+                </ul>
+            </div>
+        `
     }
-  };
+};
 
-  // --- GENERATORE DI ESERCIZI PASSO-PASSO ---
-  function generateExercise(topicId) {
-    const r = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
-    const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+// 2. GENERATORE DINAMICO DI ESERCIZI PASSO-PASSO
+function randInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
 
-    if (topicId === 1) {
-      const type = r(1, 3);
-      if (type === 1) {
-        // a + b * c - d
-        const a = r(3, 12), b = r(2, 6), c = r(2, 5), d = r(1, 8);
+function generateExercise(moduleId, index) {
+    switch (moduleId) {
+        case 'mod1': return genMod1(index);
+        case 'mod2': return genMod2(index);
+        case 'mod3': return genMod3(index);
+        case 'mod4': return genMod4(index);
+        case 'mod5': return genMod5(index);
+        default: return genMod1(index);
+    }
+}
+
+// MODULO 1: Ordine delle 4 operazioni (PEMDAS + Sinistra->Destra)
+function genMod1(index) {
+    const type = index % 3;
+    if (type === 0) {
+        // Tipo: A + B × C - D (Priorità moltiplicazione)
+        const a = randInt(5, 18);
+        const b = randInt(2, 6);
+        const c = randInt(3, 7);
         const prod = b * c;
-        const step2 = a + prod;
-        const finalRes = step2 - d;
+        const d = randInt(2, a + prod - 2);
+        const finalRes = a + prod - d;
+        const wrongLeftToRight = (a + b) * c - d;
+
         return {
-          topicId: 1,
-          expression: `${a} + ${b} · ${c} − ${d}`,
-          steps: [
-            {
-              prompt: `Osserva l'espressione: <strong>${a} + ${b} · ${c} − ${d}</strong>.<br>Quale operazione ha la precedenza? Scrivi il risultato di <strong>${b} · ${c}</strong>.`,
-              expected: [String(prod)],
-              hints: [
-                `Ricorda: moltiplicazioni e divisioni si fanno PRIMA di addizioni e sottrazioni.`,
-                `Devi calcolare prima ${b} · ${c}. Quanto fa?`
-              ],
-              commonErrors: {
-                [String(a + b)]: `Attenzione! Hai sommato ${a} + ${b} prima di moltiplicare. La moltiplicazione ha la precedenza sull'addizione!`
-              },
-              nextExpr: `${a} + ${prod} − ${d}`
-            },
-            {
-              prompt: `Bene! Ora l'espressione è diventata: <strong>${a} + ${prod} − ${d}</strong>.<br>Ci sono solo addizioni e sottrazioni: procedi <strong>da sinistra a destra</strong>. Quanto fa <strong>${a} + ${prod}</strong>?`,
-              expected: [String(step2)],
-              hints: [
-                `Esegui la prima operazione partendo da sinistra: ${a} + ${prod}.`
-              ],
-              commonErrors: {},
-              nextExpr: `${step2} − ${d}`
-            },
-            {
-              prompt: `Ultimo passaggio: <strong>${step2} − ${d}</strong>. Qual è il risultato finale?`,
-              expected: [String(finalRes)],
-              hints: [`Sottrai ${d} da ${step2}.`],
-              commonErrors: {},
-              nextExpr: `${finalRes}`
-            }
-          ]
+            title: `Esercizio ${index + 1} – Priorità delle operazioni`,
+            expression: `${a} + ${b} × ${c} - ${d}`,
+            steps: [
+                {
+                    prompt: `Osserva l'espressione: <span class="math-expr">${a} + ${b} × ${c} - ${d}</span>Quale operazione devi eseguire <strong>per prima</strong> e quanto fa? Scrivi il risultato di quel primo calcolo.`,
+                    choices: [`${b} × ${c} = ${prod}`, `${a} + ${b} = ${a + b}`, `${c} - ${d} = ${c - d}`],
+                    expected: String(prod),
+                    acceptAlso: [`${b}×${c}=${prod}`, `${b}*${c}=${prod}`],
+                    hints: [
+                        "Indizio 1: Ricorda la gerarchia delle operazioni: moltiplicazioni e divisioni hanno la precedenza su addizioni e sottrazioni.",
+                        `Indizio 2: Devi calcolare prima la moltiplicazione ${b} × ${c}. Quanto fa ${b} per ${c}?`
+                    ],
+                    diagnose: (val) => {
+                        if (Number(val) === a + b) {
+                            return `Attenzione: hai calcolato prima l'addizione (${a} + ${b} = ${a+b}). La moltiplicazione <strong>${b} × ${c}</strong> ha la precedenza! Quanto fa ${b} × ${c}?`;
+                        }
+                        return null;
+                    },
+                    successMsg: `Esatto! La moltiplicazione ha la precedenza: ${b} × ${c} = <strong>${prod}</strong>.`
+                },
+                {
+                    prompt: `Ora l'espressione è diventata:<span class="math-expr">${a} + ${prod} - ${d}</span>Calcola il risultato finale (procedendo da sinistra verso destra).`,
+                    expected: String(finalRes),
+                    hints: [
+                        "Indizio 1: Ora ci sono solo addizioni e sottrazioni: procedi da sinistra verso destra.",
+                        `Indizio 2: Calcola prima ${a} + ${prod} (= ${a + prod}), poi sottrai ${d}.`
+                    ],
+                    diagnose: (val) => {
+                        if (Number(val) === wrongLeftToRight) {
+                            return `Hai seguito l'ordine da sinistra a destra fin dall'inizio, ignorando la priorità della moltiplicazione. Ora calcola ${a} + ${prod} - ${d}.`;
+                        }
+                        return null;
+                    },
+                    successMsg: `Perfetto! ${a} + ${prod} - ${d} = <strong>${finalRes}</strong>.`
+                }
+            ]
         };
-      } else if (type === 2) {
-        // Sinistra -> Destra con divisioni e moltiplicazioni: (a * b) : b * c
-        const q = r(3, 8), b = r(2, 5), c = r(2, 6);
-        const a = q * b; // garantisce divisione esatta
+    } else if (type === 1) {
+        // Tipo: A ÷ B × C (Stessa priorità: da sinistra a destra!)
+        const b = randInt(2, 5);
+        const q = randInt(3, 8);
+        const a = b * q;
+        const c = randInt(2, 5);
         const finalRes = q * c;
+        const wrongRightFirst = (b * c !== 0 && a % (b * c) === 0) ? a / (b * c) : null;
+
         return {
-          topicId: 1,
-          expression: `${a} : ${b} · ${c}`,
-          steps: [
-            {
-              prompt: `Guarda bene: <strong>${a} : ${b} · ${c}</strong>.<br>Divisione e moltiplicazione hanno la <strong>stessa precedenza</strong>, quindi si va <strong>da sinistra verso destra</strong>. Quanto fa il primo calcolo <strong>${a} : ${b}</strong>?`,
-              expected: [String(q)],
-              hints: [
-                `Non fare prima ${b} · ${c}! Quando ci sono solo : e · si parte sempre da sinistra.`,
-                `Calcola ${a} diviso ${b}.`
-              ],
-              commonErrors: {
-                [String(b * c)]: `Errore classico! Hai iniziato da destra facendo ${b} · ${c}. A parità di precedenza si procede sempre da sinistra verso destra: inizia con ${a} : ${b}.`
-              },
-              nextExpr: `${q} · ${c}`
-            },
-            {
-              prompt: `Esatto! Ora resta <strong>${q} · ${c}</strong>. Qual è il risultato finale?`,
-              expected: [String(finalRes)],
-              hints: [`Moltiplica ${q} per ${c}.`],
-              commonErrors: {},
-              nextExpr: `${finalRes}`
-            }
-          ]
+            title: `Esercizio ${index + 1} – Operazioni con la stessa priorità`,
+            expression: `${a} ÷ ${b} × ${c}`,
+            steps: [
+                {
+                    prompt: `In questa espressione ci sono una divisione e una moltiplicazione:<span class="math-expr">${a} ÷ ${b} × ${c}</span>Quale calcolo va fatto <strong>per primo</strong>? Scrivi il risultato del primo passaggio.`,
+                    choices: [`${a} ÷ ${b} = ${q}`, `${b} × ${c} = ${b * c}`],
+                    expected: String(q),
+                    acceptAlso: [`${a}÷${b}=${q}`, `${a}/${b}=${q}`],
+                    hints: [
+                        "Indizio 1: Divisione e moltiplicazione hanno lo stesso livello di priorità. Quando hanno lo stesso livello, si va da sinistra verso destra.",
+                        `Indizio 2: Il primo calcolo a sinistra è ${a} ÷ ${b}. Quanto fa?`
+                    ],
+                    diagnose: (val) => {
+                        if (Number(val) === b * c) {
+                            return `Attenzione! Moltiplicazione e divisione hanno la <strong>stessa priorità</strong>, quindi non si fa prima la moltiplicazione, ma si procede <strong>da sinistra verso destra</strong>. Calcola prima ${a} ÷ ${b}.`;
+                        }
+                        return null;
+                    },
+                    successMsg: `Ottimo! A parità di priorità si va da sinistra a destra: ${a} ÷ ${b} = <strong>${q}</strong>.`
+                },
+                {
+                    prompt: `Ora completa il calcolo:<span class="math-expr">${q} × ${c}</span>Qual è il risultato finale?`,
+                    expected: String(finalRes),
+                    hints: [
+                        "Indizio 1: Moltiplica il risultato appena trovato per il numero rimasto.",
+                        `Indizio 2: Quanto fa ${q} × ${c}?`
+                    ],
+                    diagnose: (val) => {
+                        if (wrongRightFirst !== null && Number(val) === wrongRightFirst) {
+                            return `Hai diviso ${a} per (${b}×${c}), ma bisognava andare da sinistra a destra: moltiplica ${q} × ${c}.`;
+                        }
+                        return null;
+                    },
+                    successMsg: `Benissimo! ${q} × ${c} = <strong>${finalRes}</strong>.`
+                }
+            ]
         };
-      } else {
-        // Sinistra -> Destra con sottrazioni e addizioni: a - b + c
-        const b = r(3, 9), a = b + r(4, 12), c = r(2, 8);
+    } else {
+        // Tipo: A - B + C (Sottrazione e addizione da sinistra a destra)
+        const b = randInt(4, 12);
+        const a = b + randInt(5, 15);
+        const c = randInt(3, 10);
         const step1 = a - b;
         const finalRes = step1 + c;
-        return {
-          topicId: 1,
-          expression: `${a} − ${b} + ${c}`,
-          steps: [
-            {
-              prompt: `Calcola <strong>${a} − ${b} + ${c}</strong>.<br>Sottrazione e addizione hanno la stessa precedenza: si procede da sinistra a destra. Quanto fa <strong>${a} − ${b}</strong>?`,
-              expected: [String(step1)],
-              hints: [
-                `Non sommare prima ${b} + ${c}! Parti da sinistra con ${a} − ${b}.`
-              ],
-              commonErrors: {
-                [String(b + c)]: `Attenzione: l'addizione NON viene prima della sottrazione! Si va sempre da sinistra a destra: calcola prima ${a} − ${b}.`
-              },
-              nextExpr: `${step1} + ${c}`
-            },
-            {
-              prompt: `Ottimo! Ora calcola <strong>${step1} + ${c}</strong>:`,
-              expected: [String(finalRes)],
-              hints: [`Somma ${step1} e ${c}.`],
-              commonErrors: {},
-              nextExpr: `${finalRes}`
-            }
-          ]
-        };
-      }
-    }
+        const wrongAddFirst = a - (b + c);
 
-    if (topicId === 2) {
-      // Parentesi tonde e quadre: m * [ a - (b + c) ]
-      const b = r(2, 5), c = r(1, 4);
-      const tonda = b + c;
-      const a = tonda + r(3, 8);
-      const quadra = a - tonda;
-      const m = r(2, 5);
-      const finalRes = m * quadra;
-      return {
-        topicId: 2,
-        expression: `${m} · [ ${a} − (${b} + ${c}) ]`,
-        steps: [
-          {
-            prompt: `Partiamo dall'interno: prima la <strong>parentesi tonda</strong>.<br>Quanto fa <strong>(${b} + ${c})</strong>?`,
-            expected: [String(tonda)],
-            hints: [`Calcola l'operazione dentro le parentesi tonde: ${b} + ${c}.`],
-            commonErrors: {},
-            nextExpr: `${m} · [ ${a} − ${tonda} ]`
-          },
-          {
-            prompt: `Ora l'espressione è <strong>${m} · [ ${a} − ${tonda} ]</strong>.<br>Risolvi la <strong>parentesi quadra</strong>: quanto fa <strong>${a} − ${tonda}</strong>?`,
-            expected: [String(quadra)],
-            hints: [`Esegui la sottrazione dentro le quadre: ${a} − ${tonda}.`],
-            commonErrors: {},
-            nextExpr: `${m} · ${quadra}`
-          },
-          {
-            prompt: `Perfetto! Resta solo <strong>${m} · ${quadra}</strong>. Qual è il risultato finale?`,
-            expected: [String(finalRes)],
-            hints: [`Moltiplica ${m} per ${quadra}.`],
-            commonErrors: {},
-            nextExpr: `${finalRes}`
-          }
-        ]
-      };
+        return {
+            title: `Esercizio ${index + 1} – Addizioni e sottrazioni in sequenza`,
+            expression: `${a} - ${b} + ${c}`,
+            steps: [
+                {
+                    prompt: `Guarda con attenzione questa espressione:<span class="math-expr">${a} - ${b} + ${c}</span>Qual è il risultato finale? (Fai attenzione all'ordine da sinistra a destra!)`,
+                    expected: String(finalRes),
+                    hints: [
+                        "Indizio 1: Addizione e sottrazione hanno la stessa priorità. Non fare prima l'addizione solo perché viene dopo!",
+                        `Indizio 2: Calcola prima ${a} - ${b} (= ${step1}), e poi aggiungi ${c}.`
+                    ],
+                    diagnose: (val) => {
+                        if (Number(val) === wrongAddFirst) {
+                            return `Errore molto comune! Hai fatto prima ${b} + ${c} (= ${b+c}) e poi l'hai sottratto da ${a}. Addizione e sottrazione hanno la <strong>stessa priorità</strong>: devi procedere <strong>da sinistra verso destra</strong>: prima (${a} - ${b}) e poi + ${c}.`;
+                        }
+                        return null;
+                    },
+                    successMsg: `Esatto! Da sinistra verso destra: (${a} - ${b}) + ${c} = ${step1} + ${c} = <strong>${finalRes}</strong>.`
+                }
+            ]
+        };
     }
+}
 
-    if (topicId === 3) {
-      const type = r(1, 3);
-      if (type === 1) {
-        // Proprietà prodotto stessa base: b^e1 * b^e2
-        const b = pick([2, 3, 5, 7]);
-        const e1 = r(2, 4), e2 = r(2, 5);
-        const sumE = e1 + e2;
+// MODULO 2: Uso delle parentesi (tonde, quadre, graffe)
+function genMod2(index) {
+    const type = index % 2;
+    if (type === 0) {
+        // Parentesi tonda con dentro una moltiplicazione: A - (B + C × D)
+        const c = randInt(2, 5);
+        const d = randInt(2, 4);
+        const b = randInt(2, 8);
+        const inner = b + c * d;
+        const a = inner + randInt(4, 15);
+        const finalRes = a - inner;
+
         return {
-          topicId: 3,
-          expression: `${b}^${e1} · ${b}^${e2}`,
-          steps: [
-            {
-              prompt: `Applica la proprietà delle potenze con la <strong>stessa base</strong>: <strong>${b}^${e1} · ${b}^${e2}</strong>.<br>Scrivi il risultato sotto forma di potenza (usa il simbolo <strong>^</strong>, es. 2^5):`,
-              expected: [`${b}^${sumE}`, `${b}**${sumE}`],
-              hints: [
-                `Nel prodotto tra potenze con la stessa base, la base resta uguale (${b}) e gli esponenti si SOMMANO.`,
-                `Somma gli esponenti ${e1} + ${e2} e scrivi ${b}^${sumE}.`
-              ],
-              commonErrors: {
-                [`${b}^${e1 * e2}`]: `Attenzione: hai moltiplicato gli esponenti! Quando si moltiplicano potenze con la stessa base, gli esponenti si SOMMANO (${e1} + ${e2}).`,
-                [`${b * b}^${sumE}`]: `La base NON si moltiplica per se stessa! Resta ${b} e si sommano gli esponenti.`
-              },
-              nextExpr: `${b}^${sumE}`
-            }
-          ]
+            title: `Esercizio ${index + 1} – Parentesi tonde e priorità interna`,
+            expression: `${a} - (${b} + ${c} × ${d})`,
+            steps: [
+                {
+                    prompt: `Dobbiamo risolvere:<span class="math-expr">${a} - (${b} + ${c} × ${d})</span>Si parte dalla parentesi tonda <strong>(${b} + ${c} × ${d})</strong>. Qual è il risultato completo di tutta la parentesi tonda?`,
+                    expected: String(inner),
+                    hints: [
+                        `Indizio 1: Dentro la parentesi tonda (${b} + ${c} × ${d}) ci sono un'addizione e una moltiplicazione. Fai prima la moltiplicazione!`,
+                        `Indizio 2: ${c} × ${d} = ${c * d}. Ora aggiungi ${b}.`
+                    ],
+                    diagnose: (val) => {
+                        if (Number(val) === (b + c) * d) {
+                            return `Dentro la parentesi hai fatto prima ${b} + ${c}. Ricorda che anche dentro le parentesi la moltiplicazione (${c} × ${d}) viene prima dell'addizione!`;
+                        }
+                        return null;
+                    },
+                    successMsg: `Ottimo lavoro! Dentro la parentesi tonda: ${b} + ${c * d} = <strong>${inner}</strong>.`
+                },
+                {
+                    prompt: `Eliminata la parentesi tonda, resta:<span class="math-expr">${a} - ${inner}</span>Qual è il risultato finale?`,
+                    expected: String(finalRes),
+                    hints: [
+                        `Indizio 1: Esegui la sottrazione rimasta.`,
+                        `Indizio 2: Calcola ${a} - ${inner}.`
+                    ],
+                    successMsg: `Perfetto! ${a} - ${inner} = <strong>${finalRes}</strong>.`
+                }
+            ]
         };
-      } else if (type === 2) {
-        // Potenza di potenza: (b^e1)^e2
-        const b = pick([2, 3, 4, 5]);
-        const e1 = r(2, 3), e2 = r(2, 4);
-        const prodE = e1 * e2;
+    } else {
+        // Parentesi tonde dentro quadre: E + [ D - (A - B) × C ]
+        const b = randInt(2, 6);
+        const a = b + randInt(2, 5);
+        const tonda = a - b;
+        const c = randInt(2, 3);
+        const d = tonda * c + randInt(2, 8);
+        const quadra = d - tonda * c;
+        const e = randInt(3, 12);
+        const finalRes = e + quadra;
+
         return {
-          topicId: 3,
-          expression: `(${b}^${e1})^${e2}`,
-          steps: [
-            {
-              prompt: `Calcola la <strong>potenza di potenza</strong>: <strong>(${b}^${e1})^${e2}</strong>.<br>Scrivi il risultato come potenza (es. 3^6):`,
-              expected: [`${b}^${prodE}`, `${b}**${prodE}`],
-              hints: [
-                `Nella potenza di una potenza, la base resta ${b} e gli esponenti si MOLTIPLICANO.`,
-                `Moltiplica ${e1} · ${e2} e scrivi ${b}^${prodE}.`
-              ],
-              commonErrors: {
-                [`${b}^${e1 + e2}`]: `Attenzione: hai sommato gli esponenti! Nella potenza di potenza (aᵐ)ⁿ gli esponenti si MOLTIPLICANO (${e1} · ${e2}).`
-              },
-              nextExpr: `${b}^${prodE}`
-            }
-          ]
+            title: `Esercizio ${index + 1} – Parentesi tonde dentro quadre`,
+            expression: `${e} + [ ${d} - (${a} - ${b}) × ${c} ]`,
+            steps: [
+                {
+                    prompt: `Osserva questa espressione con parentesi tonde e quadre:<span class="math-expr">${e} + [ ${d} - (${a} - ${b}) × ${c} ]</span>Partiamo dalla parentesi più interna, la tonda. Quanto fa <strong>(${a} - ${b})</strong>?`,
+                    expected: String(tonda),
+                    hints: [
+                        "Indizio 1: Risolvi solo il calcolo dentro le parentesi tonde ( ... ).",
+                        `Indizio 2: Quanto fa ${a} - ${b}?`
+                    ],
+                    successMsg: `Giusto! (${a} - ${b}) = <strong>${tonda}</strong>.`
+                },
+                {
+                    prompt: `Ora l'espressione è:<span class="math-expr">${e} + [ ${d} - ${tonda} × ${c} ]</span>Calcola il valore completo della <strong>parentesi quadra</strong>.`,
+                    expected: String(quadra),
+                    hints: [
+                        `Indizio 1: Dentro la quadra [ ${d} - ${tonda} × ${c} ] devi eseguire prima la moltiplicazione ${tonda} × ${c}.`,
+                        `Indizio 2: ${tonda} × ${c} = ${tonda * c}. Poi fai ${d} - ${tonda * c}.`
+                    ],
+                    diagnose: (val) => {
+                        if (Number(val) === (d - tonda) * c) {
+                            return `Attenzione: dentro la quadra hai fatto prima ${d} - ${tonda}. Devi eseguire prima la moltiplicazione ${tonda} × ${c}!`;
+                        }
+                        return null;
+                    },
+                    successMsg: `Ottimo! Dentro la quadra: ${d} - ${tonda * c} = <strong>${quadra}</strong>.`
+                },
+                {
+                    prompt: `Ultimo passaggio:<span class="math-expr">${e} + ${quadra}</span>Qual è il risultato finale?`,
+                    expected: String(finalRes),
+                    hints: [
+                        `Indizio 1: Somma i due numeri rimasti: ${e} + ${quadra}.`
+                    ],
+                    successMsg: `Eccellente! ${e} + ${quadra} = <strong>${finalRes}</strong>.`
+                }
+            ]
         };
-      } else {
-        // Calcolo numerico con esponente 0 o potenza base: 2^3 + 5^0
-        const b = pick([2, 3]);
-        const e = b === 2 ? 3 : 2;
-        const val = Math.pow(b, e);
-        const otherBase = r(4, 15);
-        return {
-          topicId: 3,
-          expression: `${b}^${e} + ${otherBase}^0`,
-          steps: [
-            {
-              prompt: `Calcola il valore di <strong>${b}^${e}</strong> (ricorda: moltiplica ${b} per se stesso ${e} volte):`,
-              expected: [String(val)],
-              hints: [`Non fare ${b} · ${e}! Calcola ${Array(e).fill(b).join(' · ')}.`],
-              commonErrors: {
-                [String(b * e)]: `Errore frequente: ${b}^${e} non significa ${b} · ${e}, ma ${Array(e).fill(b).join(' · ')}. Riprova!`
-              },
-              nextExpr: `${val} + ${otherBase}^0`
-            },
-            {
-              prompt: `Ora quanto vale <strong>${otherBase}^0</strong>? (Qualsiasi numero diverso da zero elevato a 0...)`,
-              expected: ["1"],
-              hints: [`Per definizione, qualsiasi numero diverso da 0 elevato a 0 fa sempre 1.`],
-              commonErrors: {
-                "0": `Attenzione: ${otherBase}^0 non fa 0! Qualsiasi potenza con esponente 0 (e base ≠ 0) vale sempre 1.`
-              },
-              nextExpr: `${val} + 1`
-            },
-            {
-              prompt: `Quindi <strong>${val} + 1</strong> = ?`,
-              expected: [String(val + 1)],
-              hints: [`Somma ${val} e 1.`],
-              commonErrors: {},
-              nextExpr: `${val + 1}`
-            }
-          ]
-        };
-      }
     }
+}
 
-    if (topicId === 4) {
-      const type = r(1, 3);
-      if (type === 1) {
+// MODULO 3: Le potenze e le loro proprietà
+function genMod3(index) {
+    const type = index % 4;
+    if (type === 0) {
+        // Prodotto di potenze con stessa base: b^m × b^n
+        const b = randInt(2, 7);
+        const m = randInt(2, 5);
+        const n = randInt(2, 4);
+        const expSum = m + n;
+
+        return {
+            title: `Esercizio ${index + 1} – Prodotto di potenze con la stessa base`,
+            expression: `${b}^${m} × ${b}^${n}`,
+            steps: [
+                {
+                    prompt: `Applica la proprietà delle potenze (scrivi il risultato sotto forma di potenza usando il simbolo <strong>^</strong>, es. 2^5):<span class="math-expr">${b}^${m} × ${b}^${n}</span>`,
+                    expected: `${b}^${expSum}`,
+                    acceptAlso: [`${b}^(${expSum})`],
+                    hints: [
+                        "Indizio 1: Nel prodotto tra due potenze che hanno la STESSA base, la base resta uguale e gli esponenti si sommano.",
+                        `Indizio 2: La base è ${b}. Somma gli esponenti: ${m} + ${n} = ${expSum}. Scrivi ${b}^${expSum}.`
+                    ],
+                    diagnose: (val) => {
+                        if (val.includes(`${b * b}^`)) {
+                            return `Attenzione: la base <strong>non</strong> si moltiplica! La base resta <strong>${b}</strong> e si sommano solo gli esponenti (${m} + ${n}).`;
+                        }
+                        if (val === `${b}^${m * n}`) {
+                            return `Hai moltiplicato gli esponenti (${m}×${n}), ma nel prodotto di potenze con la stessa base gli esponenti si <strong>sommano</strong> (${m} + ${n}).`;
+                        }
+                        return null;
+                    },
+                    successMsg: `Perfetto! ${b}^${m} × ${b}^${n} = ${b}^(${m}+${n}) = <strong>${b}^${expSum}</strong>.`
+                }
+            ]
+        };
+    } else if (type === 1) {
+        // Quoziente di potenze con stessa base e calcolo valore
+        const b = randInt(2, 5);
+        const n = randInt(2, 4);
+        const m = n + 2; // Differenza sempre 2 per rendere il calcolo finale agevole
+
+        return {
+            title: `Esercizio ${index + 1} – Quoziente di potenze con la stessa base`,
+            expression: `${b}^${m} ÷ ${b}^${n}`,
+            steps: [
+                {
+                    prompt: `Riduci prima a un'unica potenza (es. 3^2):<span class="math-expr">${b}^${m} ÷ ${b}^${n}</span>`,
+                    expected: `${b}^2`,
+                    hints: [
+                        "Indizio 1: Nella divisione (quoziente) tra potenze con la stessa base, la base resta uguale e gli esponenti si sottraggono.",
+                        `Indizio 2: Sottrai gli esponenti: ${m} - ${n} = 2. Scrivi ${b}^2.`
+                    ],
+                    diagnose: (val) => {
+                        if (val === `${b}^${m + n}`) {
+                            return `Hai sommato gli esponenti, ma qui c'è una <strong>divisione (÷)</strong>: gli esponenti vanno <strong>sottratti</strong> (${m} - ${n}).`;
+                        }
+                        return null;
+                    },
+                    successMsg: `Esatto! ${b}^${m} ÷ ${b}^${n} = <strong>${b}^2</strong>.`
+                },
+                {
+                    prompt: `Ora calcola il valore numerico di <strong>${b}^2</strong> (cioè ${b} × ${b}):`,
+                    expected: String(b * b),
+                    hints: [
+                        `Indizio 1: ${b}^2 significa moltiplicare ${b} per se stesso 2 volte (${b} × ${b}).`
+                    ],
+                    diagnose: (val) => {
+                        if (Number(val) === b * 2) {
+                            return `Attenzione! ${b}^2 non significa ${b} × 2, ma <strong>${b} × ${b}</strong>!`;
+                        }
+                        return null;
+                    },
+                    successMsg: `Benissimo! ${b}^2 = <strong>${b * b}</strong>.`
+                }
+            ]
+        };
+    } else if (type === 2) {
+        // Potenza di potenza: (b^m)^n
+        const b = randInt(2, 6);
+        const m = randInt(2, 4);
+        const n = randInt(2, 3);
+        const prodExp = m * n;
+
+        return {
+            title: `Esercizio ${index + 1} – Potenza di potenza`,
+            expression: `(${b}^${m})^${n}`,
+            steps: [
+                {
+                    prompt: `Applica la proprietà della potenza di potenza (scrivi il risultato con <strong>^</strong>):<span class="math-expr">(${b}^${m})^${n}</span>`,
+                    expected: `${b}^${prodExp}`,
+                    hints: [
+                        "Indizio 1: Nella potenza di potenza, la base resta uguale e gli esponenti si moltiplicano tra loro.",
+                        `Indizio 2: Moltiplica gli esponenti: ${m} × ${n} = ${prodExp}. Scrivi ${b}^${prodExp}.`
+                    ],
+                    diagnose: (val) => {
+                        if (val === `${b}^${m + n}`) {
+                            return `Hai sommato gli esponenti, ma nella <strong>potenza di potenza</strong> gli esponenti si <strong>moltiplicano</strong> (${m} × ${n}).`;
+                        }
+                        return null;
+                    },
+                    successMsg: `Corretto! (${b}^${m})^${n} = ${b}^(${m}×${n}) = <strong>${b}^${prodExp}</strong>.`
+                }
+            ]
+        };
+    } else {
+        // Esponente 0 e 1: a^0 + b^1
+        const a = randInt(4, 19);
+        const b = randInt(3, 12);
+        const res = 1 + b;
+
+        return {
+            title: `Esercizio ${index + 1} – Casi particolari: esponente 0 e 1`,
+            expression: `${a}^0 + ${b}^1`,
+            steps: [
+                {
+                    prompt: `Calcola il valore di questa espressione:<span class="math-expr">${a}^0 + ${b}^1</span>`,
+                    expected: String(res),
+                    hints: [
+                        "Indizio 1: Qualsiasi numero (diverso da zero) elevato a 0 vale sempre 1. Qualsiasi numero elevato a 1 vale se stesso.",
+                        `Indizio 2: ${a}^0 = 1 e ${b}^1 = ${b}. Ora sommali: 1 + ${b}.`
+                    ],
+                    diagnose: (val) => {
+                        if (Number(val) === b) {
+                            return `Attenzione: ${a}^0 <strong>non</strong> fa 0! Qualsiasi numero elevato a 0 fa sempre <strong>1</strong>. Quindi 1 + ${b} = ?`;
+                        }
+                        return null;
+                    },
+                    successMsg: `Ottimo! Poiché ${a}^0 = 1 e ${b}^1 = ${b}, il risultato è 1 + ${b} = <strong>${res}</strong>.`
+                }
+            ]
+        };
+    }
+}
+
+// MODULO 4: Numeri interi relativi (Z) e regole dei segni
+function genMod4(index) {
+    const type = index % 4;
+    if (type === 0) {
         // Somma algebrica concordi negativi: -a - b
-        const a = r(3, 9), b = r(2, 8);
-        const res = -(a + b);
+        const a = randInt(3, 12);
+        const b = randInt(2, 10);
+        const res = -a - b;
+
         return {
-          topicId: 4,
-          expression: `−${a} − ${b}`,
-          steps: [
-            {
-              prompt: `Calcola la somma algebrica: <strong>−${a} − ${b}</strong>.<br><em>(Pensa: perdi ${a} euro e poi perdi altri ${b} euro...)</em>`,
-              expected: [String(res)],
-              hints: [
-                `Questa è un'addizione tra due numeri concordi negativi, NON una moltiplicazione!`,
-                `I due numeri hanno lo stesso segno (−): si sommano i valori (${a} + ${b}) e si mantiene il segno meno.`
-              ],
-              commonErrors: {
-                [String(a + b)]: `Attenzione! Hai scritto +${a + b} applicando "meno per meno fa più", ma qui NON c'è una moltiplicazione! Stai sommando due debiti: −${a} e −${b}.`,
-                [`+${a + b}`]: `Attenzione! "Meno per meno fa più" vale solo per moltiplicazione e divisione. Qui stai sommando due numeri negativi: il risultato resta negativo!`
-              },
-              nextExpr: `${res}`
-            }
-          ]
+            title: `Esercizio ${index + 1} – Somma algebrica di numeri negativi`,
+            expression: `-${a} - ${b}`,
+            steps: [
+                {
+                    prompt: `Calcola la seguente somma algebrica tra numeri negativi:<span class="math-expr">-${a} - ${b}</span>`,
+                    expected: String(res),
+                    hints: [
+                        "Indizio 1: Qui non c'è una moltiplicazione, ma una somma tra due debiti (entrambi hanno segno -). I segni sono concordi!",
+                        `Indizio 2: Quando i segni sono uguali, si conserva il segno (-) e si sommano i numeri: ${a} + ${b} = ${a+b}, quindi il risultato è -${a+b}.`
+                    ],
+                    diagnose: (val) => {
+                        if (Number(val) === a + b) {
+                            return `Attenzione! Hai scritto +${a+b}, forse pensando a "meno per meno fa più". Ma quella regola vale <strong>solo per moltiplicazioni e divisioni</strong>! Qui stai sommando due numeri negativi (-${a} e -${b}): il risultato resta <strong>negativo</strong>.`;
+                        }
+                        return null;
+                    },
+                    successMsg: `Esatto! Sommando due numeri negativi si conserva il segno meno: -${a} - ${b} = <strong>${res}</strong>.`
+                }
+            ]
         };
-      } else if (type === 2) {
-        // Moltiplicazione con segni: (-a) * (-b) o (-a) * (+b)
-        const a = r(2, 7), b = r(2, 6);
-        const isNeg2 = r(0, 1) === 1;
-        const res = isNeg2 ? a * b : -(a * b);
-        const exprStr = isNeg2 ? `(−${a}) · (−${b})` : `(−${a}) · (+${b})`;
-        return {
-          topicId: 4,
-          expression: exprStr,
-          steps: [
-            {
-              prompt: `Calcola il prodotto applicando la regola dei segni: <strong>${exprStr}</strong>`,
-              expected: isNeg2 ? [String(res), `+${res}`] : [String(res)],
-              hints: [
-                `Moltiplica prima i numeri (${a} · ${b} = ${a * b}) e poi applica la regola dei segni del prodotto.`,
-                isNeg2 ? `Segni concordi (− · −) danno risultato POSITIVO (+).` : `Segni discordi (− · +) danno risultato NEGATIVO (−).`
-              ],
-              commonErrors: {
-                [String(-res)]: `Controlla il segno! Nel prodotto: segni uguali danno +, segni diversi danno −.`
-              },
-              nextExpr: res > 0 ? `+${res}` : `${res}`
-            }
-          ]
-        };
-      } else {
-        // Eliminazione parentesi con segno meno davanti: -a - (-b)
-        const a = r(4, 10), b = r(2, 7);
+    } else if (type === 1) {
+        // Somma algebrica discordi: -a + b (con a > b)
+        const b = randInt(3, 9);
+        const a = b + randInt(2, 9);
         const res = -a + b;
+
         return {
-          topicId: 4,
-          expression: `−${a} − (−${b})`,
-          steps: [
-            {
-              prompt: `Prima togliamo la parentesi in <strong>−${a} − (−${b})</strong>.<br>Il segno <strong>−</strong> davanti alla parentesi cambia il segno interno: come diventa <strong>−(−${b})</strong>?`,
-              expected: [`+${b}`, String(b)],
-              hints: [`Un segno meno davanti a una parentesi trasforma (−${b}) nel suo opposto: +${b}.`],
-              commonErrors: {
-                [`-${b}`]: `Ricorda: il segno − davanti alla parentesi cambia il segno di ciò che c'è dentro! Quindi −(−${b}) diventa +${b}.`
-              },
-              nextExpr: `−${a} + ${b}`
-            },
-            {
-              prompt: `Esatto! Ora calcola <strong>−${a} + ${b}</strong>:`,
-              expected: res > 0 ? [String(res), `+${res}`] : [String(res)],
-              hints: [`Hanno segno diverso: fai la differenza tra ${Math.max(a,b)} e ${Math.min(a,b)} e metti il segno del numero più grande (${a > b ? '−' : '+'}).`],
-              commonErrors: {},
-              nextExpr: res > 0 ? `+${res}` : `${res}`
-            }
-          ]
+            title: `Esercizio ${index + 1} – Numeri con segno discorde`,
+            expression: `-${a} + ${b}`,
+            steps: [
+                {
+                    prompt: `Calcola il risultato:<span class="math-expr">-${a} + ${b}</span>`,
+                    expected: String(res),
+                    hints: [
+                        "Indizio 1: I due numeri hanno segni diversi (uno è -, l'altro è +). Vince il segno del numero più grande (in valore assoluto) e si fa la differenza.",
+                        `Indizio 2: Tra ${a} e ${b} è più grande ${a} (che ha segno -). Fai la differenza ${a} - ${b} = ${a-b} e metti il segno -.`
+                    ],
+                    diagnose: (val) => {
+                        if (Number(val) === a - b) {
+                            return `Il valore numerico (${a - b}) è giusto, ma hai dimenticato il <strong>segno meno</strong>! Poiché ${a} è maggiore di ${b}, vince il segno del -${a}.`;
+                        }
+                        return null;
+                    },
+                    successMsg: `Perfetto! Vince il segno del numero maggiore (-) e si fa la differenza: -${a} + ${b} = <strong>${res}</strong>.`
+                }
+            ]
         };
-      }
+    } else if (type === 2) {
+        // Moltiplicazione tra due negativi: (-a) × (-b)
+        const a = randInt(2, 8);
+        const b = randInt(2, 7);
+        const res = a * b;
+
+        return {
+            title: `Esercizio ${index + 1} – Moltiplicazione e regola dei segni`,
+            expression: `(-${a}) × (-${b})`,
+            steps: [
+                {
+                    prompt: `Applica la regola dei segni nella moltiplicazione:<span class="math-expr">(-${a}) × (-${b})</span>`,
+                    expected: String(res),
+                    acceptAlso: [`+${res}`],
+                    hints: [
+                        "Indizio 1: Qui c'è una moltiplicazione (×). Ricorda la regola dei segni: meno per meno fa...",
+                        `Indizio 2: (-) × (-) = +. Quindi il risultato è positivo: +${res} (puoi scrivere semplicemente ${res}).`
+                    ],
+                    diagnose: (val) => {
+                        if (Number(val) === -res) {
+                            return `Attenzione alla regola dei segni: nella moltiplicazione <strong>meno per meno fa PIÙ</strong>! Quindi (-${a}) × (-${b}) dà un risultato positivo.`;
+                        }
+                        return null;
+                    },
+                    successMsg: `Bravissimo! Meno per meno fa più: (-${a}) × (-${b}) = <strong>+${res}</strong>.`
+                }
+            ]
+        };
+    } else {
+        // Divisione con segni discordi: (-a) ÷ (+b) o (+a) ÷ (-b)
+        const b = randInt(2, 7);
+        const q = randInt(2, 8);
+        const a = b * q;
+        const res = -q;
+
+        return {
+            title: `Esercizio ${index + 1} – Divisione tra numeri interi`,
+            expression: `(-${a}) ÷ (+${b})`,
+            steps: [
+                {
+                    prompt: `Calcola il risultato della divisione:<span class="math-expr">(-${a}) ÷ (+${b})</span>`,
+                    expected: String(res),
+                    hints: [
+                        "Indizio 1: La regola dei segni per la divisione è identica a quella della moltiplicazione: segni diversi danno sempre meno (-).",
+                        `Indizio 2: (-) ÷ (+) = -. Dividi ${a} ÷ ${b} (= ${q}) e metti il segno meno davanti.`
+                    ],
+                    diagnose: (val) => {
+                        if (Number(val) === q) {
+                            return `Hai diviso correttamente ${a} ÷ ${b} = ${q}, ma hai dimenticato il segno! Meno diviso più fa <strong>meno (-)</strong>.`;
+                        }
+                        return null;
+                    },
+                    successMsg: `Esatto! Meno diviso più fa meno: (-${a}) ÷ (+${b}) = <strong>${res}</strong>.`
+                }
+            ]
+        };
     }
+}
 
-    if (topicId === 5) {
-      // Espressione completa in Z: (-2)^2 + [ -10 : (+2) - (-3) ] * 2
-      const b = pick([2, 3]);
-      const powVal = b * b; // (-b)^2 = +b^2
-      const q = r(2, 5);
-      const divA = q * 2; // -divA : (+2) = -q
-      const addB = r(1, 4); // -(-addB) = +addB
-      const quadra = -q + addB;
-      const mult = 2;
-      const prod = quadra * mult;
-      const finalRes = powVal + prod;
+// MODULO 5: Espressioni complete con interi, parentesi e potenze
+function genMod5(index) {
+    const type = index % 2;
+    if (type === 0) {
+        // Espressione con numero negativo moltiplicato per parentesi: A - B × (C - D)
+        const c = randInt(2, 5);
+        const d = c + randInt(2, 6); // C - D è negativo!
+        const diff = c - d; // es. -3
+        const b = randInt(2, 4);
+        const prod = -b * diff; // positivo! perché -B * (negativo) = +
+        const a = randInt(3, 12);
+        const finalRes = a + prod;
 
-      const expr = `(−${b})² + [ −${divA} : (+2) − (−${addB}) ] · ${mult}`;
-      return {
-        topicId: 5,
-        expression: expr,
-        steps: [
-          {
-            prompt: `Affrontiamo l'espressione completa:<br><strong>${expr}</strong><br>Passo 1: calcola la potenza <strong>(−${b})²</strong> (occhio alla parentesi!).`,
-            expected: [String(powVal), `+${powVal}`],
-            hints: [
-              `La base è (−${b}) ed è elevata a un esponente pari (2): (−${b}) · (−${b}) = +${powVal}.`
-            ],
-            commonErrors: {
-              [`-${powVal}`]: `Attenzione! Il segno meno è DENTRO la parentesi: (−${b}) · (−${b}) fa +${powVal} (meno per meno = più!).`
-            },
-            nextExpr: `+${powVal} + [ −${divA} : (+2) − (−${addB}) ] · ${mult}`
-          },
-          {
-            prompt: `Passo 2: dentro la parentesi quadra <strong>[ −${divA} : (+2) − (−${addB}) ]</strong>, esegui per prima la divisione <strong>−${divA} : (+2)</strong>:`,
-            expected: [`-${q}`],
-            hints: [`Dividi ${divA} per 2 e applica la regola dei segni (− : + = −).`],
-            commonErrors: {
-              [String(q)]: `Ricorda il segno! Negativo diviso positivo (− : +) dà risultato NEGATIVO (−${q}).`
-            },
-            nextExpr: `+${powVal} + [ −${q} + ${addB} ] · ${mult}`
-          },
-          {
-            prompt: `Passo 3: togliendo la tonda −(−${addB}) diventa +${addB}. Calcola ora il valore della quadra: <strong>−${q} + ${addB}</strong>:`,
-            expected: quadra > 0 ? [String(quadra), `+${quadra}`] : [String(quadra)],
-            hints: [`Fai la somma algebrica tra −${q} e +${addB}.`],
-            commonErrors: {},
-            nextExpr: `+${powVal} + (${quadra}) · ${mult}`
-          },
-          {
-            prompt: `Passo 4: ora abbiamo <strong>+${powVal} + (${quadra}) · ${mult}</strong>. Esegui prima la moltiplicazione <strong>(${quadra}) · ${mult}</strong>:`,
-            expected: prod > 0 ? [String(prod), `+${prod}`] : [String(prod)],
-            hints: [`Moltiplica ${quadra} per ${mult} facendo attenzione al segno.`],
-            commonErrors: {},
-            nextExpr: `+${powVal} ${prod >= 0 ? '+ ' + prod : '− ' + Math.abs(prod)}`
-          },
-          {
-            prompt: `Ultimo passaggio! Calcola <strong>+${powVal} ${prod >= 0 ? '+ ' + prod : '− ' + Math.abs(prod)}</strong>:`,
-            expected: finalRes > 0 ? [String(finalRes), `+${finalRes}`] : [String(finalRes)],
-            hints: [`Esegui l'ultima somma algebrica.`],
-            commonErrors: {},
-            nextExpr: `${finalRes}`
-          }
-        ]
-      };
+        return {
+            title: `Sfida ${index + 1} – Espressione con interi e parentesi`,
+            expression: `${a} - ${b} × (${c} - ${d})`,
+            steps: [
+                {
+                    prompt: `Risolviamo passo passo:<span class="math-expr">${a} - ${b} × (${c} - ${d})</span><strong>Passaggio 1:</strong> Calcola il valore dentro la parentesi tonda <strong>(${c} - ${d})</strong>:`,
+                    expected: String(diff),
+                    hints: [
+                        `Indizio 1: In (${c} - ${d}) stai togliendo un numero più grande (${d}) da uno più piccolo (${c}), quindi il risultato sarà negativo.`,
+                        `Indizio 2: Fai ${d} - ${c} (= ${d - c}) e metti il segno meno.`
+                    ],
+                    diagnose: (val) => {
+                        if (Number(val) === d - c) {
+                            return `Attenzione al segno! Stai calcolando ${c} - ${d}, non ${d} - ${c}. Il risultato è <strong>-${d - c}</strong>.`;
+                        }
+                        return null;
+                    },
+                    successMsg: `Perfetto! (${c} - ${d}) = <strong>${diff}</strong>.`
+                },
+                {
+                    prompt: `Ora l'espressione è diventata:<span class="math-expr">${a} - ${b} × (${diff})</span><strong>Passaggio 2:</strong> Esegui la moltiplicazione <strong>-${b} × (${diff})</strong> (ricorda la regola dei segni!):`,
+                    expected: String(prod),
+                    acceptAlso: [`+${prod}`],
+                    hints: [
+                        "Indizio 1: Stai moltiplicando due numeri entrambi negativi: -${b} e ${diff}. Meno per meno fa più!",
+                        `Indizio 2: (-${b}) × (${diff}) = +${prod}.`
+                    ],
+                    diagnose: (val) => {
+                        if (Number(val) === -prod) {
+                            return `Occhio ai segni! Davanti al ${b} c'è un meno (-${b}) e dentro la parentesi c'è un meno (${diff}). Meno per meno fa <strong>PIÙ (+${prod})</strong>!`;
+                        }
+                        return null;
+                    },
+                    successMsg: `Ottimo! Meno per meno fa più: (-${b}) × (${diff}) = <strong>+${prod}</strong>.`
+                },
+                {
+                    prompt: `Ultimo passaggio:<span class="math-expr">${a} + ${prod}</span>Qual è il risultato finale dell'espressione?`,
+                    expected: String(finalRes),
+                    hints: [
+                        `Indizio 1: Somma ${a} + ${prod}.`
+                    ],
+                    successMsg: `Straordinario! Hai completato l'espressione: ${a} + ${prod} = <strong>${finalRes}</strong>.`
+                }
+            ]
+        };
+    } else {
+        // Espressione con potenza di numero negativo: (-A)^2 + B × (-C)
+        const a = randInt(2, 4);
+        const powVal = a * a; // (-a)^2 è positivo
+        const b = randInt(2, 5);
+        const c = randInt(2, 4);
+        const prodVal = -b * c; // negativo
+        const finalRes = powVal + prodVal;
+
+        return {
+            title: `Sfida ${index + 1} – Potenze di numeri negativi e priorità`,
+            expression: `(-${a})^2 + ${b} × (-${c})`,
+            steps: [
+                {
+                    prompt: `Affrontiamo questa espressione:<span class="math-expr">(-${a})^2 + ${b} × (-${c})</span><strong>Passaggio 1:</strong> Calcola prima la potenza <strong>(-${a})^2</strong>:`,
+                    expected: String(powVal),
+                    acceptAlso: [`+${powVal}`],
+                    hints: [
+                        `Indizio 1: (-${a})^2 significa (-${a}) × (-${a}). Poiché l'esponente (2) è pari, il risultato è positivo!`,
+                        `Indizio 2: (-${a}) × (-${a}) = +${powVal}.`
+                    ],
+                    diagnose: (val) => {
+                        if (Number(val) === -powVal) {
+                            return `Attenzione! La parentesi include il segno meno: (-${a})^2 = (-${a}) × (-${a}). Meno per meno fa <strong>+${powVal}</strong>!`;
+                        }
+                        return null;
+                    },
+                    successMsg: `Esatto! (-${a})^2 = <strong>+${powVal}</strong>.`
+                },
+                {
+                    prompt: `Ora abbiamo:<span class="math-expr">${powVal} + ${b} × (-${c})</span><strong>Passaggio 2:</strong> Calcola la moltiplicazione <strong>+${b} × (-${c})</strong>:`,
+                    expected: String(prodVal),
+                    hints: [
+                        "Indizio 1: Più per meno fa meno (-).",
+                        `Indizio 2: (+${b}) × (-${c}) = -${b * c}.`
+                    ],
+                    diagnose: (val) => {
+                        if (Number(val) === b * c) {
+                            return `Hai dimenticato il segno! (+${b}) × (-${c}) ha segni discordi, quindi fa <strong>-${b * c}</strong>.`;
+                        }
+                        return null;
+                    },
+                    successMsg: `Benissimo! (+${b}) × (-${c}) = <strong>${prodVal}</strong>.`
+                },
+                {
+                    prompt: `Ultimo passaggio:<span class="math-expr">${powVal} - ${b * c}</span>Qual è il risultato finale?`,
+                    expected: String(finalRes),
+                    hints: [
+                        `Indizio 1: Calcola ${powVal} - ${b * c}.`
+                    ],
+                    successMsg: `Eccellente! ${powVal} - ${b * c} = <strong>${finalRes}</strong>.`
+                }
+            ]
+        };
     }
-  }
+}
 
-  // --- GESTIONE INTERFACCIA CHAT ---
-  const chatWindow = document.getElementById("chatWindow");
-  const userInput = document.getElementById("userInput");
+// 3. STATO DELL'APPLICAZIONE
+const state = {
+    currentModule: 'mod1',
+    score: 0,
+    moduleProgress: {
+        mod1: { completed: 0, errors: 0, hintsUsed: 0 },
+        mod2: { completed: 0, errors: 0, hintsUsed: 0 },
+        mod3: { completed: 0, errors: 0, hintsUsed: 0 },
+        mod4: { completed: 0, errors: 0, hintsUsed: 0 },
+        mod5: { completed: 0, errors: 0, hintsUsed: 0 }
+    },
+    activeExercise: null,
+    currentStepIndex: 0,
+    hintLevel: 0,
+    waitingForNextExercise: false
+};
 
-  function appendBotMessage(htmlContent, chips = []) {
-    const row = document.createElement("div");
-    row.className = "message-row bot";
+// Riferimenti DOM
+const chatWindow = document.getElementById('chat-window');
+const quickActions = document.getElementById('quick-actions');
+const chatForm = document.getElementById('chat-form');
+const userInput = document.getElementById('user-input');
+const moduleSelect = document.getElementById('module-select');
+const scoreDisplay = document.getElementById('score-display');
+const progressFill = document.getElementById('progress-fill');
+const progressText = document.getElementById('progress-text');
 
-    const avatar = document.createElement("div");
-    avatar.className = "msg-avatar";
-    avatar.textContent = "∑";
+// 4. FUNZIONI DI RENDERING MESSAGGI NELLA CHAT
+function appendMessage(sender, htmlContent) {
+    const row = document.createElement('div');
+    row.className = `message-row ${sender}`;
 
-    const bubble = document.createElement("div");
-    bubble.className = "msg-bubble";
+    const avatar = document.createElement('div');
+    avatar.className = 'avatar';
+    avatar.textContent = sender === 'bot' ? 'MB' : 'TU';
+
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
     bubble.innerHTML = htmlContent;
-
-    if (chips.length > 0) {
-      const chipWrap = document.createElement("div");
-      chipWrap.className = "quick-replies";
-      chips.forEach(c => {
-        const btn = document.createElement("button");
-        btn.className = "chip-btn" + (c.secondary ? " secondary" : "");
-        btn.textContent = c.label;
-        btn.onclick = () => c.action();
-        chipWrap.appendChild(btn);
-      });
-      bubble.appendChild(chipWrap);
-    }
 
     row.appendChild(avatar);
     row.appendChild(bubble);
     chatWindow.appendChild(row);
+
+    // Scorrimento automatico fluido verso il basso
     chatWindow.scrollTop = chatWindow.scrollHeight;
-  }
+}
 
-  function appendUserMessage(text) {
-    const row = document.createElement("div");
-    row.className = "message-row user";
+function updateStatsUI() {
+    scoreDisplay.textContent = `${state.score} pt`;
+    const modStats = state.moduleProgress[state.currentModule];
+    const target = MODULES_INFO[state.currentModule].targetExercises;
+    const pct = Math.min(100, Math.round((modStats.completed / target) * 100));
+    progressFill.style.width = `${pct}%`;
+    progressText.textContent = `${modStats.completed} / ${target} esercizi`;
+}
 
-    const bubble = document.createElement("div");
-    bubble.className = "msg-bubble";
-    bubble.textContent = text;
+function setQuickActions(buttonsList) {
+    quickActions.innerHTML = '';
+    buttonsList.forEach(btn => {
+        const el = document.createElement('button');
+        el.type = 'button';
+        el.className = `chip-btn ${btn.className || ''}`;
+        el.textContent = btn.label;
+        el.addEventListener('click', btn.onClick);
+        quickActions.appendChild(el);
+    });
+}
 
-    row.appendChild(bubble);
-    chatWindow.appendChild(row);
-    chatWindow.scrollTop = chatWindow.scrollHeight;
-  }
-
-  function showMenu() {
-    const chips = Object.values(TOPICS).map(t => ({
-      label: t.title,
-      action: () => selectTopic(t.id)
-    }));
-
-    appendBotMessage(
-      `Ciao! Sono <strong>MateBot</strong>, il tuo tutor personale di matematica.<br>
-      Lavoreremo <strong>un passaggio alla volta</strong>: se sbagli un calcolo, ti aiuterò a capire il perché senza darti subito la soluzione.<br><br>
-      <strong>Scegli l'argomento su cui vuoi allenarti oggi:</strong>`,
-      chips
-    );
-  }
-
-  function selectTopic(topicId) {
-    state.currentTopic = topicId;
-    const topic = TOPICS[topicId];
-    document.getElementById("currentTopicLabel").textContent = topic.short;
-
-    appendUserMessage(topic.title);
-    appendBotMessage(
-      `Ottima scelta! Ecco un rapido promemoria prima di iniziare:<div class="rule-card">${topic.rule}</div>`
-    );
-    startNewExercise();
-  }
-
-  function startNewExercise() {
-    if (!state.currentTopic) {
-      showMenu();
-      return;
-    }
-    const ex = generateExercise(state.currentTopic);
-    state.currentExercise = ex;
+// 5. LOGICA CONVERSAZIONALE DEL TUTOR
+function startModule(moduleId, isInitial = false) {
+    state.currentModule = moduleId;
+    state.activeExercise = null;
     state.currentStepIndex = 0;
     state.hintLevel = 0;
+    state.waitingForNextExercise = false;
 
-    const firstStep = ex.steps[0];
-    appendBotMessage(
-      `<strong>Nuovo esercizio:</strong><span class="math-expr">${ex.expression}</span>${firstStep.prompt}`
-    );
-    userInput.focus();
-  }
+    updateStatsUI();
 
-  function normalizeAnswer(str) {
-    return str
-      .trim()
-      .replace(/\s+/g, "")
-      .replace(/−/g, "-")
-      .replace(/–/g, "-")
-      .replace(/^\+/, ""); // +5 -> 5
-  }
+    const mod = MODULES_INFO[moduleId];
+    const greeting = isInitial
+        ? `Benvenuto! Sono <strong>MateBot</strong>, il tuo tutor personale di matematica. Lavoreremo insieme passo dopo passo: non preoccuparti se sbagli, ogni errore ci serve per capire meglio le regole.`
+        : `Perfetto, passiamo a: <strong>${mod.title}</strong>.`;
 
-  function handleUserSubmit() {
-    const raw = userInput.value.trim();
-    if (!raw) return;
-    userInput.value = "";
-    appendUserMessage(raw);
+    appendMessage('bot', `
+        <p>${greeting}</p>
+        <p style="margin-top:6px;">Prima di iniziare con gli esercizi guidati, ripassiamo insieme la regola chiave:</p>
+        ${mod.theoryHTML}
+        <p>Quando ti senti pronto per provare il primo esercizio, clicca su <strong>"Iniziamo l'esercizio"</strong> oppure chiedimi un altro esempio.</p>
+    `);
 
-    if (!state.currentExercise) {
-      showMenu();
-      return;
+    setQuickActions([
+        {
+            label: "▶ Iniziamo l'esercizio",
+            onClick: () => {
+                appendMessage('user', "Ho capito la regola, iniziamo l'esercizio!");
+                launchNextExercise();
+            }
+        },
+        {
+            label: "📖 Rivedi la regola",
+            onClick: () => {
+                appendMessage('user', "Puoi ripetermi la regola?");
+                appendMessage('bot', mod.theoryHTML);
+            }
+        }
+    ]);
+}
+
+function launchNextExercise() {
+    const modId = state.currentModule;
+    const completedCount = state.moduleProgress[modId].completed;
+    state.activeExercise = generateExercise(modId, completedCount);
+    state.currentStepIndex = 0;
+    state.hintLevel = 0;
+    state.waitingForNextExercise = false;
+
+    askCurrentStep();
+}
+
+function askCurrentStep() {
+    const ex = state.activeExercise;
+    const step = ex.steps[state.currentStepIndex];
+    state.hintLevel = 0;
+
+    let stepHeader = state.currentStepIndex === 0
+        ? `<div style="font-size:0.82rem; font-weight:700; color:var(--primary); text-transform:uppercase; margin-bottom:4px;">${ex.title}</div>`
+        : '';
+
+    appendMessage('bot', `${stepHeader}<p>${step.prompt}</p>`);
+
+    // Costruisce i pulsanti rapidi (eventuali scelte multiple + aiuti)
+    const actions = [];
+    if (step.choices && step.choices.length > 0) {
+        step.choices.forEach(choiceText => {
+            // Estrae il valore dopo '=' se presente per inviarlo facilmente
+            const cleanVal = choiceText.includes('=') ? choiceText.split('=')[1].trim() : choiceText;
+            actions.push({
+                label: choiceText,
+                className: 'choice-btn',
+                onClick: () => handleStudentSubmission(cleanVal, choiceText)
+            });
+        });
     }
 
-    const ex = state.currentExercise;
-    const step = ex.steps[state.currentStepIndex];
-    const normUser = normalizeAnswer(raw);
-    const isCorrect = step.expected.some(ans => normalizeAnswer(ans) === normUser);
+    actions.push({
+        label: "💡 Dammi un indizio",
+        className: 'hint-btn',
+        onClick: () => provideProgressiveHint()
+    });
+
+    actions.push({
+        label: "🤔 Non so come procedere",
+        className: 'hint-btn',
+        onClick: () => provideProgressiveHint(true)
+    });
+
+    actions.push({
+        label: "📘 Rivedi regola",
+        onClick: () => {
+            appendMessage('user', "Mostrami di nuovo la regola.");
+            appendMessage('bot', MODULES_INFO[state.currentModule].theoryHTML);
+        }
+    });
+
+    setQuickActions(actions);
+    userInput.focus();
+}
+
+function provideProgressiveHint(isStuck = false) {
+    if (!state.activeExercise) return;
+    const step = state.activeExercise.steps[state.currentStepIndex];
+    state.moduleProgress[state.currentModule].hintsUsed++;
+
+    if (isStuck) {
+        appendMessage('user', "Non so come procedere, mi aiuti?");
+    } else {
+        appendMessage('user', "Dammi un indizio.");
+    }
+
+    if (state.hintLevel < step.hints.length) {
+        const hintText = step.hints[state.hintLevel];
+        state.hintLevel++;
+        appendMessage('bot', `<div class="feedback-box feedback-hint">${hintText}</div>`);
+    } else {
+        // Se ha già esaurito gli indizi, guida alla soluzione del singolo passaggio
+        appendMessage('bot', `
+            <div class="feedback-box feedback-hint">
+                Ti aiuto a sbloccare questo passaggio: il risultato corretto per questo step è <strong>${step.expected}</strong>. 
+                Scrivi <strong>${step.expected}</strong> qui sotto per confermare e proseguire insieme!
+            </div>
+        `);
+    }
+    userInput.focus();
+}
+
+function normalizeAnswer(str) {
+    return str
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, '')
+        .replace(/\*/g, '×')
+        .replace(/\//g, '÷')
+        .replace(/^\+/, ''); // Rimuove il '+' iniziale se l'utente scrive "+5" invece di "5"
+}
+
+function handleStudentSubmission(rawInput, displayLabel = null) {
+    const text = rawInput.trim();
+    if (!text) return;
+
+    // Mostra il messaggio dello studente nella chat
+    appendMessage('user', displayLabel || text);
+    userInput.value = '';
+
+    // Se stiamo aspettando che lo studente avvii il prossimo esercizio
+    if (state.waitingForNextExercise || !state.activeExercise) {
+        if (text.toLowerCase().includes('esempio') || text.toLowerCase().includes('regola')) {
+            appendMessage('bot', MODULES_INFO[state.currentModule].theoryHTML);
+        } else {
+            launchNextExercise();
+        }
+        return;
+    }
+
+    const step = state.activeExercise.steps[state.currentStepIndex];
+    const normUser = normalizeAnswer(text);
+    const normExpected = normalizeAnswer(step.expected);
+    const normAcceptAlso = (step.acceptAlso || []).map(normalizeAnswer);
+
+    const isCorrect = (normUser === normExpected) || normAcceptAlso.includes(normUser);
 
     if (isCorrect) {
-      state.correctSteps++;
-      document.getElementById("stepCount").textContent = state.correctSteps;
-      state.currentStepIndex++;
-      state.hintLevel = 0;
+        // Risposta corretta!
+        const pointsEarned = state.hintLevel === 0 ? 10 : 5;
+        state.score += pointsEarned;
+        updateStatsUI();
 
-      if (state.currentStepIndex < ex.steps.length) {
-        const nextStep = ex.steps[state.currentStepIndex];
-        appendBotMessage(
-          `<div class="feedback-box feedback-ok">✅ <strong>Corretto!</strong> Espressione aggiornata: <strong>${step.nextExpr}</strong></div>
-          <div style="margin-top:8px;">${nextStep.prompt}</div>`
-        );
-      } else {
-        // Esercizio completato!
-        state.solvedExercises++;
-        state.completedByTopic[state.currentTopic]++;
-        document.getElementById("solvedCount").textContent = state.solvedExercises;
+        appendMessage('bot', `<div class="feedback-box feedback-success">✓ ${step.successMsg} <em>(+${pointsEarned} punti)</em></div>`);
 
-        appendBotMessage(
-          `<div class="feedback-box feedback-ok">🎉 <strong>Esercizio completato!</strong> Risultato finale: <strong>${step.nextExpr}</strong></div>
-          <div style="margin-top:8px;">Cosa vuoi fare adesso?</div>`,
-          [
-            { label: "➡️ Altro esercizio su questo argomento", action: () => startNewExercise() },
-            { label: "📚 Cambia argomento", secondary: true, action: () => showMenu() },
-            { label: "📋 Vedi scheda finale", secondary: true, action: () => openReport() }
-          ]
-        );
-        state.currentExercise = null;
-      }
-    } else {
-      // Registra errore per statistiche
-      const tTitle = TOPICS[state.currentTopic].short;
-      state.errorsByTopic[tTitle] = (state.errorsByTopic[tTitle] || 0) + 1;
-
-      // Controlla errori tipici programmati
-      let customFeedback = null;
-      if (step.commonErrors) {
-        for (const [errKey, msg] of Object.entries(step.commonErrors)) {
-          if (normalizeAnswer(errKey) === normUser) {
-            customFeedback = msg;
-            break;
-          }
+        // Passa allo step successivo o completa l'esercizio
+        state.currentStepIndex++;
+        if (state.currentStepIndex < state.activeExercise.steps.length) {
+            setTimeout(() => askCurrentStep(), 450);
+        } else {
+            completeCurrentExercise();
         }
-      }
+    } else {
+        // Risposta errata: analisi diagnostica mirata
+        state.moduleProgress[state.currentModule].errors++;
 
-      if (customFeedback) {
-        appendBotMessage(
-          `<div class="feedback-box feedback-err">❌ <strong>Non esattamente.</strong> ${customFeedback}</div>
-          <div style="margin-top:8px;">Riprova questo passaggio!</div>`
-        );
-      } else {
-        appendBotMessage(
-          `<div class="feedback-box feedback-err">❌ <strong>Risposta non corretta.</strong> Controlla bene le precedenze e i segni, poi riprova.</div>`,
-          [
-            { label: "💡 Chiedi un indizio", secondary: true, action: () => requestHint() }
-          ]
-        );
-      }
+        let customDiagnosis = null;
+        if (typeof step.diagnose === 'function') {
+            customDiagnosis = step.diagnose(normUser);
+        }
+
+        if (customDiagnosis) {
+            appendMessage('bot', `<div class="feedback-box feedback-error">✗ ${customDiagnosis}</div>`);
+        } else {
+            appendMessage('bot', `
+                <div class="feedback-box feedback-error">
+                    ✗ Non è ancora il valore giusto (hai scritto <strong>${text}</strong>). 
+                    Riprova con calma! Se hai dubbi, clicca su <strong>"Dammi un indizio"</strong>.
+                </div>
+            `);
+        }
     }
+}
+
+function completeCurrentExercise() {
+    const modId = state.currentModule;
+    state.moduleProgress[modId].completed++;
+    state.waitingForNextExercise = true;
+    updateStatsUI();
+
+    const completed = state.moduleProgress[modId].completed;
+    const target = MODULES_INFO[modId].targetExercises;
+
+    if (completed >= target) {
+        // Obiettivo del modulo raggiunto!
+        const moduleKeys = Object.keys(MODULES_INFO);
+        const currentIdx = moduleKeys.indexOf(modId);
+        const nextModId = currentIdx < moduleKeys.length - 1 ? moduleKeys[currentIdx + 1] : null;
+
+        let congratsMsg = `
+            <p>🎉 <strong>Ottimo traguardo!</strong> Hai completato gli esercizi previsti per il <strong>${MODULES_INFO[modId].title}</strong>.</p>
+            <p style="margin-top:6px;">Puoi continuare ad allenarti su questo argomento per consolidare la sicurezza, passare al modulo successivo, oppure aprire il <strong>Riepilogo</strong> in alto per mostrare i risultati al docente.</p>
+        `;
+        appendMessage('bot', congratsMsg);
+
+        const nextButtons = [
+            {
+                label: "🔄 Altro esercizio su questo tema",
+                onClick: () => {
+                    appendMessage('user', "Vorrei fare un altro esercizio di allenamento.");
+                    launchNextExercise();
+                }
+            }
+        ];
+
+        if (nextModId) {
+            nextButtons.unshift({
+                label: `➡ Passa a: ${MODULES_INFO[nextModId].title.split(':')[0]}`,
+                onClick: () => {
+                    moduleSelect.value = nextModId;
+                    startModule(nextModId);
+                }
+            });
+        } else {
+            nextButtons.unshift({
+                label: "📋 Apri Riepilogo Finale per il Docente",
+                onClick: () => openReportModal()
+            });
+        }
+
+        setQuickActions(nextButtons);
+    } else {
+        appendMessage('bot', `<p>Ottimo lavoro! Sei a <strong>${completed} su ${target}</strong> esercizi completati in questo modulo. Pronto per il prossimo?</p>`);
+        setQuickActions([
+            {
+                label: "➡ Prossimo esercizio",
+                onClick: () => {
+                    appendMessage('user', "Prossimo esercizio!");
+                    launchNextExercise();
+                }
+            },
+            {
+                label: "📘 Ripassa la regola",
+                onClick: () => {
+                    appendMessage('user', "Fammi rivedere la regola.");
+                    appendMessage('bot', MODULES_INFO[modId].theoryHTML);
+                }
+            }
+        ]);
+    }
+}
+
+// 6. GESTIONE EVENTI INPUT, TASTIERINO MATEMATICO E MODALE REPORT
+chatForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    handleStudentSubmission(userInput.value);
+});
+
+moduleSelect.addEventListener('change', (e) => {
+    startModule(e.target.value);
+});
+
+// Tastierino simboli matematici
+document.querySelectorAll('.key-btn[data-insert]').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const symbol = btn.getAttribute('data-insert');
+        const start = userInput.selectionStart || userInput.value.length;
+        const end = userInput.selectionEnd || userInput.value.length;
+        const val = userInput.value;
+        userInput.value = val.slice(0, start) + symbol + val.slice(end);
+        userInput.focus();
+        userInput.setSelectionRange(start + symbol.length, start + symbol.length);
+    });
+});
+
+document.getElementById('clear-input-btn').addEventListener('click', () => {
+    userInput.value = userInput.value.slice(0, -1);
     userInput.focus();
-  }
+});
 
-  function requestHint() {
-    if (!state.currentExercise) {
-      appendBotMessage("Scegli prima un argomento dal menu per iniziare un esercizio!");
-      return;
-    }
-    const step = state.currentExercise.steps[state.currentStepIndex];
-    const hintIdx = Math.min(state.hintLevel, step.hints.length - 1);
-    const hintText = step.hints[hintIdx];
-    state.hintLevel++;
+// Modale Report Finale
+const reportModal = document.getElementById('report-modal');
+const reportContent = document.getElementById('report-content');
+const studentNameInput = document.getElementById('student-name-input');
+const copyToast = document.getElementById('copy-toast');
 
-    appendBotMessage(
-      `<div class="feedback-box feedback-hint">💡 <strong>Indizio ${state.hintLevel}:</strong> ${hintText}</div>`
-    );
-    userInput.focus();
-  }
+function buildReportText() {
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('it-IT') + ' ' + now.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+    const studentName = studentNameInput.value.trim() || "Studente (non specificato)";
 
-  function showRuleReminder() {
-    if (!state.currentTopic) {
-      showMenu();
-      return;
-    }
-    const topic = TOPICS[state.currentTopic];
-    appendBotMessage(`<div class="rule-card">${topic.rule}</div>`);
-  }
+    let totalCompleted = 0;
+    let totalErrors = 0;
+    let lines = [];
 
-  function skipExercise() {
-    if (!state.currentTopic) {
-      showMenu();
-      return;
-    }
-    appendBotMessage("Nessun problema, passiamo a un altro esercizio!");
-    startNewExercise();
-  }
+    lines.push("================================================");
+    lines.push("SCHEDA DI ATTIVITÀ - MATEBOT TUTOR MATEMATICA");
+    lines.push("================================================");
+    lines.push(`Studente: ${studentName}`);
+    lines.push(`Data e ora: ${dateStr}`);
+    lines.push(`Punteggio totale: ${state.score} punti`);
+    lines.push("------------------------------------------------");
+    lines.push("DETTAGLIO PER ARGOMENTO:");
 
-  // --- TASTIERINO E INPUT ---
-  function insertChar(ch) {
-    const start = userInput.selectionStart;
-    const end = userInput.selectionEnd;
-    const val = userInput.value;
-    userInput.value = val.slice(0, start) + ch + val.slice(end);
-    userInput.focus();
-    userInput.setSelectionRange(start + ch.length, start + ch.length);
-  }
-
-  function backspaceChar() {
-    const start = userInput.selectionStart;
-    const end = userInput.selectionEnd;
-    const val = userInput.value;
-    if (start !== end) {
-      userInput.value = val.slice(0, start) + val.slice(end);
-      userInput.setSelectionRange(start, start);
-    } else if (start > 0) {
-      userInput.value = val.slice(0, start - 1) + val.slice(start);
-      userInput.setSelectionRange(start - 1, start - 1);
-    }
-    userInput.focus();
-  }
-
-  userInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      handleUserSubmit();
-    }
-  });
-
-  // --- REPORT FINALE ---
-  function updateReportText() {
-    const name = document.getElementById("studentNameInput").value.trim() || "Studente";
-    const now = new Date().toLocaleDateString("it-IT");
-    const lines = [
-      `RIEPILOGO ATTIVITÀ MATEBOT`,
-      `Studente: ${name} | Data: ${now}`,
-      `----------------------------------------`,
-      `• Esercizi completati: ${state.solvedExercises}`,
-      `• Passaggi risolti correttamente: ${state.correctSteps}`,
-      ``,
-      `Dettaglio per argomento:`
-    ];
-
-    Object.values(TOPICS).forEach(t => {
-      const done = state.completedByTopic[t.id] || 0;
-      lines.push(`- ${t.short}: ${done} esercizi completati`);
+    Object.keys(MODULES_INFO).forEach(key => {
+        const info = MODULES_INFO[key];
+        const prog = state.moduleProgress[key];
+        totalCompleted += prog.completed;
+        totalErrors += prog.errors;
+        const status = prog.completed >= info.targetExercises ? "[COMPLETATO]" : (prog.completed > 0 ? "[IN CORSO]" : "[NON INIZIATO]");
+        lines.push(`• ${info.title}`);
+        lines.push(`  Stato: ${status} | Esercizi risolti: ${prog.completed}/${info.targetExercises} | Tentativi da rivedere: ${prog.errors} | Aiuti usati: ${prog.hintsUsed}`);
     });
 
-    const errKeys = Object.keys(state.errorsByTopic);
-    if (errKeys.length > 0) {
-      lines.push(``, `Aree su cui esercitarsi ancora:`);
-      errKeys.forEach(k => {
-        lines.push(`- ${k} (${state.errorsByTopic[k]} tentativi da rivedere)`);
-      });
+    lines.push("------------------------------------------------");
+    lines.push(`RIEPILOGO GENERALE: ${totalCompleted} esercizi completati con successo.`);
+    lines.push("================================================");
+
+    return lines.join('\n');
+}
+
+function openReportModal() {
+    copyToast.style.display = 'none';
+    reportContent.textContent = buildReportText();
+    reportModal.classList.add('active');
+}
+
+document.getElementById('open-report-btn').addEventListener('click', openReportModal);
+document.getElementById('close-report-btn').addEventListener('click', () => {
+    reportModal.classList.remove('active');
+});
+
+studentNameInput.addEventListener('input', () => {
+    reportContent.textContent = buildReportText();
+});
+
+// Copia negli appunti compatibile anche con iframe (execCommand)
+document.getElementById('copy-report-btn').addEventListener('click', () => {
+    const textToCopy = buildReportText();
+    const tempArea = document.createElement('textarea');
+    tempArea.value = textToCopy;
+    tempArea.style.position = 'fixed';
+    tempArea.style.left = '-9999px';
+    document.body.appendChild(tempArea);
+    tempArea.select();
+    try {
+        document.execCommand('copy');
+        copyToast.style.display = 'block';
+    } catch (err) {
+        copyToast.textContent = "Seleziona il testo nel riquadro e copialo manualmente (Ctrl+C).";
+        copyToast.style.display = 'block';
     }
+    document.body.removeChild(tempArea);
+});
 
-    document.getElementById("reportContent").textContent = lines.join("
-");
-  }
+document.getElementById('print-report-btn').addEventListener('click', () => {
+    window.print();
+});
 
-  function openReport() {
-    updateReportText();
-    document.getElementById("reportModal").classList.add("active");
-  }
+reportModal.addEventListener('click', (e) => {
+    if (e.target === reportModal) {
+        reportModal.classList.remove('active');
+    }
+});
 
-  function closeReport() {
-    document.getElementById("reportModal").classList.remove("active");
-  }
-
-  function copyReport() {
-    const text = document.getElementById("reportContent").textContent;
-    navigator.clipboard.writeText(text).then(() => {
-      alert("Riepilogo copiato negli appunti! Ora puoi incollarlo per il docente.");
-    });
-  }
-
-  // Avvio iniziale
-  window.onload = () => {
-    showMenu();
-  };
+// Avvio iniziale al caricamento della pagina
+window.addEventListener('DOMContentLoaded', () => {
+    startModule('mod1', true);
+});
 </script>
+
 </body>
 </html>
